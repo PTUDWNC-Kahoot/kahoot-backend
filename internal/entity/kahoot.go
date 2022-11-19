@@ -1,35 +1,35 @@
 package entity
 
 type Kahoot struct {
-	Id              int
-	Account_id      int
-	Title           string
-	Description     string
-	Cover_image_url string
-	Visibility      bool
+	ID            int    `json:"id"`
+	AccountID     int    `json:"accountId"`
+	Title         string `json:"title"`
+	Description   string `json:"description"`
+	CoverImageURL string `json:"coverImageUrl"`
+	Visibility    bool   `json:"visibility"`
 }
 
 type Slide struct {
-	Id             int
-	Kahoot_id      int
-	Type          string
-	Order          int
-	Question       string
-	Time_limit     int
-	Points         int
-	Image_url      string
-	Video_url      string
-	Answer_options string
-	Title          string
-	Text           string
+	ID            int    `json:"id"`
+	KahootID      int    `json:"kahootId"`
+	Type          string `json:"type"`
+	Order         int    `json:"order"`
+	Question      string `json:"question"`
+	TimeLimit     int    `json:"timeLimit"`
+	Points        int    `json:"points"`
+	ImageURL      string `json:"imageUrl"`
+	VideoURL      string `json:"videoUrl"`
+	AnswerPptions string `json:"answerPptions"`
+	Title         string `json:"title"`
+	Text          string `json:"text"`
 }
 
 type Answer struct {
-	Id         int
-	Kahoot_id  int
-	Image_url  string
-	Color      string
-	Content    string
-	Is_correct bool
-	Order      int
+	ID        int    `json:"id"`
+	KahootID  int    `json:"kahootId"`
+	ImageURL  string `json:"imageUrl"`
+	Color     string `json:"color"`
+	Content   string `json:"content"`
+	IsCorrect bool   `json:"isCorrect"`
+	Order     int    `json:"order"`
 }

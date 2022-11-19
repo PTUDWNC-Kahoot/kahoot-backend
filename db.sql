@@ -1,9 +1,9 @@
-CREATE TABLE "accounts" (
+CREATE TABLE "users" (
   "id" SERIAL PRIMARY KEY,
-  "email" varchar(255), NOT NULL,
-  "password" varchar(255), NOT NULL,
-  "name" varchar(255),,
-  "workplace" varchar(255),,
+  "email" varchar(255),
+  "password" varchar(255),
+  "name" varchar(255),
+  "workplace" varchar(255),
   "organization" varchar(255),
   "cover_image_url" text,
   "players" int,
@@ -16,7 +16,7 @@ CREATE TABLE "accounts" (
 
 CREATE TABLE "kahoots" (
   "id" SERIAL PRIMARY KEY,
-  "account_id" int NOT NULL,
+  "account_id" int,
   "title" varchar(255),
   "description" text,
   "cover_image_url" text,
@@ -25,12 +25,12 @@ CREATE TABLE "kahoots" (
 
 CREATE TABLE "slides" (
   "id" SERIAL PRIMARY KEY,
-  "kahoot_id" int NOT NULL,
+  "kahoot_id" int,
   "type" int,
-  "order" int NOT NULL,
+  "order" int,
   "question" text,
-  "time_limit" int NOT NULL,
-  "points" int NOT NULL,
+  "time_limit" int,
+  "points" int,
   "image_url" text,
   "video_url" text,
   "answer_options" text,
@@ -40,7 +40,7 @@ CREATE TABLE "slides" (
 
 CREATE TABLE "answers" (
   "id" SERIAL PRIMARY KEY,
-  "kahoot_id" int NOT NULL,
+  "kahoot_id" int,
   "image_url" text,
   "color" int,
   "content" text,
@@ -49,12 +49,12 @@ CREATE TABLE "answers" (
 );
 
 CREATE TABLE "reports" (
-  "game_id" int NOT NULL
+  "game_id" int
 );
 
 CREATE TABLE "points" (
-  "user_id" int NOT NULL,
-  "kahoot_id" int NOT NULL,
+  "user_id" int,
+  "kahoot_id" int,
   "turn_code" int,
   "nickname" varchar(50),
   "points" int

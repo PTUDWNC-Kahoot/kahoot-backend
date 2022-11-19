@@ -28,10 +28,6 @@ func (r *router) Register(gr *gin.Engine) {
 		user.POST("/login", r.login)
 		user.POST("/register", r.register)
 	}
-	internal := gr.Group("/internal")
-	{
-		internal.POST("/Verify", r.login)
-	}
 }
 
 func (r *router) login(c *gin.Context) {

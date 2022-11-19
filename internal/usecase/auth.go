@@ -19,7 +19,7 @@ func NewAuthUsecase(repo repo.AuthRepo, jwtService service.JWTHelper) AuthUsecas
 }
 
 func (u *authUsecase) Login(request *entity.User) (string, error) {
-	isUserAuthenticated := u.repo.Login(&entity.User{Id: request.Id, Email: request.Email, Password: request.Password})
+	isUserAuthenticated := u.repo.Login(request)
 
 	var token string
 	var err error = nil
@@ -31,7 +31,7 @@ func (u *authUsecase) Login(request *entity.User) (string, error) {
 	return "", err
 }
 func (u *authUsecase) Register(request *entity.User) (string, error) {
-	isUserAuthenticated := u.repo.Register(&entity.User{Id: request.Id, Email: request.Email, Password: request.Password})
+	isUserAuthenticated := u.repo.Register(request)
 
 	var token string
 	var err error = nil

@@ -24,19 +24,21 @@ func getMD5Hash(text string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (db *authRepo) Login(request *entity.User) bool {
+func (repo *authRepo) Login(request *entity.User) bool {
 	var result entity.User
 	encryptedPass := getMD5Hash(request.Password)
-	err := db.db.Where("username=? and password=?", request.Email, encryptedPass).First(&result).Error
+	err := repo.db.Where("username=? and password=?", request.Email, encryptedPass).First(&result).Error
 	if err != nil {
 		return false
 	}
 	return true
 }
-func (db *authRepo) Register(request *entity.User) bool {
+func (repo *authRepo) Register(request *entity.User) bool {
 	var result entity.User
 	encryptedPass := getMD5Hash(request.Password)
-	err := db.db.Create(&entity.User{Id: request.Id, Email: request.Email, Password: encryptedPass}).Scan(&result).Error
+	kh:=entity.Kahoot{ID:1}
+	repo.db.Debug().Where("ID=?", kh.ID).First(&kh)
+	err := repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass}).Scan(&result).Error
 	if err != nil {
 		return false
 	}

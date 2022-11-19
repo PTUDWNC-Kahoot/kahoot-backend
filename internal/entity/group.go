@@ -1,16 +1,16 @@
 package entity
 
 type Group struct {
-	Id              int
-	Admin_id        int
-	Name            string
-	Invitation_code string
-	Members         []*User
-	Kahoots         []*Kahoot
+	ID             int       `json:"id"`
+	AdminID        int       `json:"adminId"`
+	Name           string    `json:"name"`
+	InvitationLink string    `json:"invitationLink"`
+	Members        []*User   `json:"members"`
+	Kahoots        []*Kahoot `json:"kahoots"`
 }
 
 type Topic struct {
-	Id              int
-	Name            string
-	Cover_image_url string
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	CoverImageUrl string `json:"coverImageUrl"`
 }
