@@ -16,7 +16,7 @@ CREATE TABLE "users" (
 
 CREATE TABLE "kahoots" (
   "id" SERIAL PRIMARY KEY,
-  "account_id" int,
+  "user_id" int,
   "title" varchar(255),
   "description" text,
   "cover_image_url" text,

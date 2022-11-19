@@ -1,8 +1,17 @@
 package entity
 
+type Role int8
+
+const (
+	Owner Role = iota
+	CoOwner
+	Member
+	KickedOut
+)
+
 type Group struct {
-	ID             int       `json:"id"`
-	AdminID        int       `json:"adminId"`
+	ID             uint32    `json:"id"`
+	AdminID        uint32    `json:"adminId"`
 	Name           string    `json:"name"`
 	InvitationLink string    `json:"invitationLink"`
 	Members        []*User   `json:"members"`
@@ -10,7 +19,13 @@ type Group struct {
 }
 
 type Topic struct {
-	ID            int    `json:"id"`
+	ID            uint32 `json:"id"`
 	Name          string `json:"name"`
 	CoverImageUrl string `json:"coverImageUrl"`
+}
+
+type GroupMember struct {
+	GroupID  uint32 `json:"groupId"`
+	MemberID uint32 `json:"memberId"`
+	Role     Role   `json:"role"`
 }
