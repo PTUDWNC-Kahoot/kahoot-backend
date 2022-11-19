@@ -14,12 +14,14 @@ type Router interface {
 type router struct {
 	jwtHelper service.JWTHelper
 	u         usecase.KahootUsecase
+	g         usecase.GroupUsecase
 }
 
-func NewRouter(jwtHelper service.JWTHelper, u usecase.KahootUsecase) Router {
+func NewRouter(jwtHelper service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
 	return &router{
 		jwtHelper: jwtHelper,
 		u:         u,
+		g:         g,
 	}
 }
 
@@ -46,9 +48,10 @@ func (r *router) Register(g *gin.Engine) {
 		internal.POST("/VerifyToken", r.verifyToken())
 	}
 }
-func NewInternalRouter(s service.JWTHelper, u *usecase.KahootUsecase) Router {
+func NewInternalRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
 	return &router{
 		jwtHelper: s,
 		u:         u,
+		g:         g,
 	}
 }

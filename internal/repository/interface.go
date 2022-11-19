@@ -9,3 +9,6 @@ type AuthRepo interface {
 
 type KahootRepo interface {
 }
+
+type GroupRepo interface {
+}

@@ -8,3 +8,5 @@ type AuthUsecase interface {
 }
 type KahootUsecase interface {
 }
+type GroupUsecase interface {
+}

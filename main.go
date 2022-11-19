@@ -25,9 +25,12 @@ func main() {
 	authRouter := authRouter.NewAuthRouter(authUsecase)
 	authRouter.Register(r)
 
-	repo := repo.NewKahootRepo(db)
-	kahootUsecase := usecase.NewKahootUsecase(repo)
-	router := v1.NewRouter(jwtHandler, &kahootUsecase)
+	kahootRepo := repo.NewKahootRepo(db)
+	kahootUsecase := usecase.NewKahootUsecase(kahootRepo)
+
+	groupRepo := repo.NewKahootRepo(db)
+	groupUsecase := usecase.NewGroupUsecase(groupRepo)
+	router := v1.NewRouter(jwtHandler, kahootUsecase, groupUsecase)
 	router.Register(r)
 
 	r.Run(":" + s.Port)
