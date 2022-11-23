@@ -32,12 +32,20 @@ func NewRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsec
 }
 
 func (r *router) Register(g *gin.Engine) {
+	user := g.Group("/user")
+	user.Use(r.verifyToken())
+	{
+		user.GET("/profile")
+		user.GET("/update")
+		user.GET("/delete")
+	}
 
 	kahoot := g.Group("/kahoots")
 	kahoot.Use(r.verifyToken())
 	{
 		// kahoot.GET("", getKahoots)
 	}
+
 	group := g.Group("/groups")
 	group.Use(r.verifyToken())
 	{
@@ -46,8 +54,9 @@ func (r *router) Register(g *gin.Engine) {
 		group.POST("", r.createGroup)
 		group.PUT("/:id", r.updateGroup)
 		group.DELETE("/:id", r.deleteGroup)
-		group.DELETE("/join-group/:group-code", r.joinGroupByLink)
+
 	}
+	g.GET("/join-group/:group-code", r.joinGroupByLink)
 }
 
 func (r *router) verifyToken() gin.HandlerFunc {
@@ -165,6 +174,18 @@ func (r *router) deleteGroup(c *gin.Context) {
 }
 
 func (r *router) joinGroupByLink(c *gin.Context) {
+	//check token and get user email to join group
+	authHeader := c.GetHeader("Authorization")
+	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
+
+	claims, err := r.jwtHelper.ValidateJWT(tokenString)
+	if err != nil || claims.Email == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+			"error_message": err.Error(),
+		})
+		return
+	}
+	//group jobs
 	groupCode := c.Param("group-code")
 	if groupCode == "" {
 		c.JSON(http.StatusBadRequest, map[string]string{
@@ -172,10 +193,10 @@ func (r *router) joinGroupByLink(c *gin.Context) {
 		})
 		return
 	}
-	group, err := r.g.JoinGroupByLink(groupCode)
+	group, err := r.g.JoinGroupByLink(claims.Email, groupCode)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, map[string]string{
-			"error_message": err.Error(),
+			"error_message": "unable to join group",
 		})
 		return
 	}

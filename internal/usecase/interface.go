@@ -3,8 +3,8 @@ package usecase
 import "examples/identity/internal/entity"
 
 type AuthUsecase interface {
-	Login(request *entity.User) (string, error)
-	Register(request *entity.User) (string, error)
+	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, string, error)
+	Register(request *entity.User) (uint32, string, error)
 }
 type KahootUsecase interface {
 }
@@ -14,5 +14,5 @@ type GroupUsecase interface {
 	Create(request *entity.Group) (uint32, error) //generate invitation link
 	Update(request *entity.Group) error
 	Delete(id uint32) error
-	JoinGroupByLink(string) (*entity.Group, error)
+	JoinGroupByLink(string, string) (*entity.Group, error)
 }

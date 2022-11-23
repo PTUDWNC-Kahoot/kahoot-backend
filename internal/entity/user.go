@@ -3,7 +3,7 @@ package entity
 import "gorm.io/gorm"
 
 type User struct {
-	ID            uint8  `json:"id"`
+	ID            uint32  `json:"id"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
 	Name          string `json:"name"`

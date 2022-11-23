@@ -22,12 +22,9 @@ func NewAuthRouter(u usecase.AuthUsecase) AuthRouter {
 	}
 }
 
-func (r *router) Register(gr *gin.Engine) {
-	user := gr.Group("/user")
-	{
-		user.POST("/login", r.login)
-		user.POST("/register", r.register)
-	}
+func (r *router) Register(g *gin.Engine) {
+	g.POST("/login", r.login)
+	g.POST("/register", r.register)
 }
 
 func (r *router) login(c *gin.Context) {
@@ -40,12 +37,21 @@ func (r *router) login(c *gin.Context) {
 		return
 	}
 
-	result, err := r.u.Login(&entity.User{Email: request.Email, Password: request.Password})
+	user, groups, kahoots, token, err := r.u.Login(&entity.User{Email: request.Email, Password: request.Password})
 	if err != nil {
 		c.JSON(http.StatusNotFound, err)
 		return
 	}
-	c.JSON(http.StatusOK, &AuthenResponse{Token: result})
+	c.JSON(http.StatusOK, &AuthenResponse{
+		Token:         token,
+		ID:            user.ID,
+		Name:          user.Name,
+		Workplace:     user.Workplace,
+		Organization:  user.Organization,
+		CoverImageURL: user.CoverImageURL,
+		Groups:        groups,
+		Kahoots:       kahoots,
+	})
 }
 
 func (r *router) register(c *gin.Context) {
@@ -58,12 +64,15 @@ func (r *router) register(c *gin.Context) {
 		})
 		return
 	}
-	token, err := r.u.Register(&entity.User{Email: request.Email, Password: request.Password})
+	id, token, err := r.u.Register(&entity.User{Email: request.Email, Password: request.Password})
 	if err != nil || token == "" {
 		c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": "email is already used",
 		})
 		return
 	}
-	c.JSON(http.StatusOK, &AuthenResponse{Token: token})
+	c.JSON(http.StatusOK, &AuthenResponse{
+		Token: token,
+		ID:    id,
+	})
 }

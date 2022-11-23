@@ -49,11 +49,18 @@ func (g *groupRepo) UpdateOne(request *entity.Group) error {
 func (g *groupRepo) DeleteOne(id uint32) error {
 	return g.db.Delete(&entity.Group{ID: id}).Error
 }
-func (g *groupRepo) JoinGroupByLink(groupCode string) (*entity.Group, error) {
+func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity.Group, error) {
 	group := &entity.Group{}
 	err := g.db.Where("invitation_link=?", groupCode).First(group).Error
 	if group.ID == 0 || err != nil {
 		return nil, err
 	}
+	user := &entity.User{}
+	err = g.db.Where("email=?", userEmail).First(user).Error
+	if user.ID == 0 || err != nil {
+		return nil, err
+	}
+
+
 	return group, nil
 }

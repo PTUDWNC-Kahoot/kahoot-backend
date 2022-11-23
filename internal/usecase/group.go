@@ -40,6 +40,7 @@ func encode(u uuid.UUID) string {
 	return new(big.Int).SetBytes(u[:]).Text(62)
 }
 
-func (g *groupUsecase) JoinGroupByLink(groupCode string) (*entity.Group, error) {
-	return g.repo.JoinGroupByLink(groupCode)
+func (g *groupUsecase) JoinGroupByLink(userEmail string,groupCode string) (*entity.Group, error) {
+	return g.repo.JoinGroupByLink(userEmail,groupCode)
+
 }
