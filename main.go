@@ -28,7 +28,7 @@ func main() {
 	kahootRepo := repo.NewKahootRepo(db)
 	kahootUsecase := usecase.NewKahootUsecase(kahootRepo)
 
-	groupRepo := repo.NewKahootRepo(db)
+	groupRepo := repo.NewGroupRepo(db)
 	groupUsecase := usecase.NewGroupUsecase(groupRepo)
 	router := v1.NewRouter(jwtHandler, kahootUsecase, groupUsecase)
 	router.Register(r)

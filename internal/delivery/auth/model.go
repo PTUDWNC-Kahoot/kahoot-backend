@@ -8,3 +8,10 @@ type AuthenRequest struct {
 type AuthenResponse struct {
 	Token string `json:"token"`
 }
+
+func (a AuthenRequest) Validate() bool {
+	if a.Email == "" || a.Password == "" {
+		return false
+	}
+	return true
+}

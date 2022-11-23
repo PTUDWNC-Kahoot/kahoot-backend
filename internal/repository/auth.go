@@ -33,10 +33,11 @@ func (repo *authRepo) Login(request *entity.User) bool {
 	}
 	return true
 }
+
 func (repo *authRepo) Register(request *entity.User) bool {
 	var result entity.User
 	encryptedPass := getMD5Hash(request.Password)
-	kh:=entity.Kahoot{ID:1}
+	kh := entity.Kahoot{ID: 1}
 	repo.db.Debug().Where("ID=?", kh.ID).First(&kh)
 	err := repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass}).Scan(&result).Error
 	if err != nil {

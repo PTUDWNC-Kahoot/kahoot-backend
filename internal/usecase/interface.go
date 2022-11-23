@@ -9,4 +9,10 @@ type AuthUsecase interface {
 type KahootUsecase interface {
 }
 type GroupUsecase interface {
+	GetGroups() ([]*entity.Group, error)
+	Get(id uint32) (*entity.Group, error)
+	Create(request *entity.Group) (uint32, error) //generate invitation link
+	Update(request *entity.Group) error
+	Delete(id uint32) error
+	JoinGroupByLink(string) (*entity.Group, error)
 }

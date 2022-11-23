@@ -32,13 +32,14 @@ func (r *router) Register(gr *gin.Engine) {
 
 func (r *router) login(c *gin.Context) {
 	var request AuthenRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-
+	err := c.ShouldBindJSON(&request)
+	if err != nil || !request.Validate() {
 		c.JSON(http.StatusBadRequest, map[string]string{
-			"error_message": "error",
+			"error_message": "email or password is invalid",
 		})
 		return
 	}
+
 	result, err := r.u.Login(&entity.User{Email: request.Email, Password: request.Password})
 	if err != nil {
 		c.JSON(http.StatusNotFound, err)
@@ -50,17 +51,19 @@ func (r *router) login(c *gin.Context) {
 func (r *router) register(c *gin.Context) {
 	var request AuthenRequest
 
-	if err := c.ShouldBindJSON(&request); err != nil {
-
+	err := c.ShouldBindJSON(&request)
+	if err != nil || !request.Validate() {
 		c.JSON(http.StatusBadRequest, map[string]string{
-			"error_message": "error",
+			"error_message": "email or password is invalid",
 		})
 		return
 	}
-	result, err := r.u.Register(&entity.User{Email: request.Email, Password: request.Password})
-	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
+	token, err := r.u.Register(&entity.User{Email: request.Email, Password: request.Password})
+	if err != nil || token == "" {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "email is already used",
+		})
 		return
 	}
-	c.JSON(http.StatusOK, &AuthenResponse{Token: result})
+	c.JSON(http.StatusOK, &AuthenResponse{Token: token})
 }

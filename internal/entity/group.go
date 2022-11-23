@@ -1,5 +1,7 @@
 package entity
 
+import "gorm.io/gorm"
+
 type Role int8
 
 const (
@@ -13,9 +15,11 @@ type Group struct {
 	ID             uint32    `json:"id"`
 	AdminID        uint32    `json:"adminId"`
 	Name           string    `json:"name"`
+	CoverImageURL  string    `json:"coverImageUrl"`
 	InvitationLink string    `json:"invitationLink"`
-	Members        []*User   `json:"members"`
-	Kahoots        []*Kahoot `json:"kahoots"`
+	Users          []*User   `json:"users" gorm:"many2many:group_users;ForeignKey:id;References:id"`
+	Kahoots        []*Kahoot `json:"kahoots" gorm:"many2many:group_kahoots;"`
+	gorm.Model
 }
 
 type Topic struct {
@@ -25,7 +29,7 @@ type Topic struct {
 }
 
 type GroupMember struct {
-	GroupID  uint32 `json:"groupId"`
-	MemberID uint32 `json:"memberId"`
+	GroupID  uint32 `gorm:"primaryKey"`
+	MemberID uint32 `gorm:"primaryKey"`
 	Role     Role   `json:"role"`
 }

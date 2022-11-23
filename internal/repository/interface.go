@@ -11,4 +11,10 @@ type KahootRepo interface {
 }
 
 type GroupRepo interface {
+	Collection() ([]*entity.Group, error)
+	GetOne(id uint32) (*entity.Group, error)
+	CreateOne(request *entity.Group) (uint32, error) //generate invitation link
+	UpdateOne(request *entity.Group) error
+	DeleteOne(id uint32) error
+	JoinGroupByLink(string) (*entity.Group, error) 
 }
