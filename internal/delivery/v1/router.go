@@ -3,6 +3,7 @@ package v1
 import (
 	service "examples/identity/internal/service/jwthelper"
 	"examples/identity/internal/usecase"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,18 +12,37 @@ import (
 type Router interface {
 	Register(g *gin.Engine)
 }
+
 type router struct {
 	jwtHelper service.JWTHelper
 	u         usecase.KahootUsecase
 	g         usecase.GroupUsecase
 }
 
-func NewRouter(jwtHelper service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
+func NewRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
 	return &router{
-		jwtHelper: jwtHelper,
+		jwtHelper: s,
 		u:         u,
 		g:         g,
 	}
+}
+
+func (r *router) Register(g *gin.Engine) {
+
+	kahoot := g.Group("/kahoots")
+	kahoot.Use(r.verifyToken())
+	{
+		kahoot.GET("", getKahoots)
+	}
+	group := g.Group("/groups")
+	group.Use(r.verifyToken())
+	{
+		group.POST("", getKahoots)
+	}
+}
+
+func getKahoots(c *gin.Context) {
+	c.JSON(http.StatusOK, "get kahoots")
 }
 
 func (r *router) verifyToken() gin.HandlerFunc {
@@ -30,28 +50,14 @@ func (r *router) verifyToken() gin.HandlerFunc {
 		var request IdentityRequest
 		c.ShouldBindJSON(&request)
 
-		token, _ := r.jwtHelper.ValidateJWT(request.TokenString)
-		if token.Valid {
-			c.JSON(http.StatusOK, IdentityResponse{
-				IsValid: true,
+		claims, err := r.jwtHelper.ValidateJWT(request.TokenString)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+				"error_message": err.Error(),
 			})
-		} else {
-			c.AbortWithStatus(http.StatusUnauthorized)
+			fmt.Println(err)
+			return
 		}
-	}
-}
-
-func (r *router) Register(g *gin.Engine) {
-
-	internal := g.Group("/internal")
-	{
-		internal.POST("/VerifyToken", r.verifyToken())
-	}
-}
-func NewInternalRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
-	return &router{
-		jwtHelper: s,
-		u:         u,
-		g:         g,
+		c.JSON(http.StatusOK, claims)
 	}
 }
