@@ -32,6 +32,7 @@ func NewRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsec
 }
 
 func (r *router) Register(g *gin.Engine) {
+	g.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
 	user := g.Group("/user")
 	user.Use(r.verifyToken())
 	{
