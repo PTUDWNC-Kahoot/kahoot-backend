@@ -23,8 +23,11 @@ func NewAuthRouter(u usecase.AuthUsecase) AuthRouter {
 }
 
 func (r *router) Register(g *gin.Engine) {
-	g.POST("/login", r.login)
-	g.POST("/register", r.register)
+	auth := g.Group("/auth")
+	{
+		auth.POST("/login", r.login)
+		auth.POST("/register", r.register)
+	}
 }
 
 func (r *router) login(c *gin.Context) {

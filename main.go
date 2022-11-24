@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
+	r := gin.Default()
 	r.Use(CORSMiddleware())
 	s := config.LoadEnvConfig()
 	db := db.InitDatabase(s)
