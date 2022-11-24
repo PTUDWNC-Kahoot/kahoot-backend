@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/cdf7ab07-059a-4fab-a4c2-227d79d922ef/AppServices/subscriptions/cdf7ab07-059a-4fab-a4c2-227d79d922ef/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/kahootee",
+  "appService.deploySubpath": "."
+}
