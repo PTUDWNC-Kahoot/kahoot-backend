@@ -29,7 +29,7 @@ jobs:
     - name: Login via Az module
       uses: azure/login@v1
       with:
-        creds: ${{secrets.AZURE_CREDENTIALS}}
+        creds: ${{secrets.azureWebAppPublishProfile}}
         enable-AzPSSession: true 
       env: # Or as an environment variable
         credentials: ${{ secrets.AZURE_CREDENTIALS }}
