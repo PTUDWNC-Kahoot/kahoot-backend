@@ -23,7 +23,13 @@ jobs:
 
     - name: Test
       run: go test
-    
+
+    - name: Sample Azure action
+      with: # Set Azure credentials secret as an input
+        credentials: ${{ secrets.AZURE_CREDENTIALS }}
+      env: # Or as an environment variable
+        credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
     - name: Login via Az module
       uses: azure/login@v1
       with:
