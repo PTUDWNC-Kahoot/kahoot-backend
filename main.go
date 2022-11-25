@@ -34,7 +34,7 @@ func main() {
 	groupUsecase := usecase.NewGroupUsecase(groupRepo)
 	router := v1.NewRouter(jwtHandler, kahootUsecase, groupUsecase)
 	router.Register(r)
-	port := os.Getenv("PORT")
+	port := os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
 		port = s.Port
 	}

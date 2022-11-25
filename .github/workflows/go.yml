@@ -12,7 +12,7 @@ on:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: linux-latest
     steps:
     - uses: actions/checkout@v3
 
@@ -22,7 +22,16 @@ jobs:
         go-version: 1.18
 
     - name: Build
-      run: go build -v ./...
+      run: go build -o build/go-app.exe -v
 
     - name: Test
-      run: go test -v ./...
+      run: go test
+      
+    - name: Deploy to Azure
+      uses: Azure/webapps-deploy@v2
+      with:
+        # Name of the Azure Web App
+        app-name: kahootee
+        # Applies to Web App only: Path to package or folder. *.zip, *.war, *.jar or a folder to deploy
+        package: build/
+        publish-profile: ${{ secrets.azureWebAppPublishProfile }}
