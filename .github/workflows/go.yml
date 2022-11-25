@@ -32,7 +32,7 @@ jobs:
         creds: ${{secrets.azureWebAppPublishProfile}}
         enable-AzPSSession: true 
       env: # Or as an environment variable
-        credentials: ${{ secrets.AZURE_CREDENTIALS }}
+        credentials: ${{ secrets.azureWebAppPublishProfile }}
     
     - name: Deploy to Azure
       uses: Azure/webapps-deploy@v2
