@@ -24,16 +24,6 @@ jobs:
     - name: Test
       run: go test
       
-      
-
-    - name: Login via Az module
-      uses: azure/login@v1
-      with:
-        creds: ${{secrets.azureWebAppPublishProfile}}
-        enable-AzPSSession: true 
-      env: # Or as an environment variable
-        credentials: ${{ secrets.azureWebAppPublishProfile }}
-    
     - name: Deploy to Azure
       uses: Azure/webapps-deploy@v2
       with:
