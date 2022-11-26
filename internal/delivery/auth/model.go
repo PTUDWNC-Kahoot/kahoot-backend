@@ -8,8 +8,7 @@ type AuthenRequest struct {
 }
 
 type AuthenResponse struct {
-	Token string `json:"token"`
-
+	Token         string           `json:"token"`
 	ID            uint32           `json:"id"`
 	Name          string           `json:"name"`
 	Workplace     string           `json:"workplace"`
