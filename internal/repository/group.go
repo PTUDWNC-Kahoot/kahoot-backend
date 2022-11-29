@@ -2,6 +2,7 @@ package repo
 
 import (
 	"examples/identity/internal/entity"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -80,4 +81,34 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 	}
 
 	return group, nil
+}
+
+func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
+	users := []uint32{}
+	fmt.Println("emaillist: ", email_list)
+	for _, email := range email_list {
+		user := entity.User{}
+		err := g.db.Where("email=?", email).First(&user).Error
+		if err != nil {
+			continue
+		}
+
+		existed := &entity.GroupMember{}
+		g.db.Where("member_id=?", user.ID).Where("group_id=?", groupID).First(existed)
+		if existed.MemberID != 0 {
+			continue
+		}
+		users = append(users, user.ID)
+	}
+	fmt.Println("id_list", users)
+	groupMembers := []*entity.GroupMember{}
+	for _, userID := range users {
+		groupMember := &entity.GroupMember{
+			GroupID:  groupID,
+			MemberID: userID,
+			Role:     entity.Member,
+		}
+		groupMembers = append(groupMembers, groupMember)
+	}
+	return g.db.Create(&groupMembers).Error
 }

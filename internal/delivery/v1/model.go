@@ -6,3 +6,7 @@ type IdentityRequest struct {
 type IdentityResponse struct {
 	IsValid bool
 }
+
+type EmailList struct {
+	Emails []string `json:"email_list"`
+}

@@ -4,6 +4,7 @@ import (
 	"examples/identity/internal/entity"
 	service "examples/identity/internal/service/jwthelper"
 	"examples/identity/internal/usecase"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -63,6 +64,7 @@ func (r *router) Register(g *gin.Engine) {
 		group.PUT("/:id", r.updateGroup)
 		group.DELETE("/:id", r.deleteGroup)
 		group.POST("/join-group/:group-code", r.joinGroupByLink)
+		group.POST("/:id/invite", r.invite)
 	}
 }
 
@@ -210,4 +212,34 @@ func (r *router) joinGroupByLink(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, group)
+}
+
+func (r *router) invite(c *gin.Context) {
+	groupID, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error_message": "invalid request",
+		})
+		return
+	}
+
+	e := EmailList{}
+	if err := c.ShouldBindJSON(&e); err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error_message": "invalid request email_list",
+		})
+		return
+	}
+	fmt.Println("r_l:", e)
+
+	if err := r.g.Invite(e.Emails, uint32(groupID)); err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"error_message": "unable to invite",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "invited successfully",
+	})
 }
