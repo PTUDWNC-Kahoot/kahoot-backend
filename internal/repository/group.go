@@ -40,6 +40,14 @@ func (g *groupRepo) CreateOne(request *entity.Group) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
+	err = g.db.Create(&entity.GroupMember{
+		GroupID:  request.ID,
+		MemberID: request.AdminID,
+		Role:     entity.Owner,
+	}).Error
+	if err != nil {
+		return 0, err
+	}
 	return request.ID, nil
 }
 
