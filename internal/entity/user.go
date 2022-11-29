@@ -1,9 +1,13 @@
 package entity
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
-	ID            uint32  `json:"id"`
+	ID            uint32 `json:"id"`
 	Email         string `json:"email"`
 	Password      string `json:"password"`
 	Name          string `json:"name"`
@@ -14,4 +18,11 @@ type User struct {
 	Plays         int8   `json:"plays"`
 	Kahoots       int8   `json:"kahoots"`
 	gorm.Model
+}
+
+type RegisterOrder struct {
+	ID         uint32
+	Email      string
+	VerifyCode int
+	ExpiresAt  time.Time
 }

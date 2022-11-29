@@ -4,7 +4,10 @@ import "examples/identity/internal/entity"
 
 type AuthRepo interface {
 	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, error)
-	Register(*entity.User) (uint32, error)
+	Register(*entity.User) error
+	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
+	VerifyEmail(string, int) bool
+	CheckEmailExisted(string) bool
 }
 
 type KahootRepo interface {

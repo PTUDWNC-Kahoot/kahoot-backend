@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"examples/identity/internal/entity"
+	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -40,14 +42,41 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 	return user, groups, kahoots, nil
 }
 
-func (repo *authRepo) Register(request *entity.User) (uint32, error) {
+func (repo *authRepo) Register(request *entity.User) error {
 	user := &entity.User{}
 	encryptedPass := getMD5Hash(request.Password)
 	kh := entity.Kahoot{ID: 1}
 	repo.db.Debug().Where("ID=?", kh.ID).First(&kh)
-	err := repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass}).Scan(user).Error
+	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass}).Scan(user).Error
+}
+
+func (repo *authRepo) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {
+	request.ExpiresAt = time.Now().Add(time.Minute * 2)
+	err := repo.db.Debug().Create(request).Error
 	if err != nil {
 		return 0, err
 	}
-	return user.ID, nil
+	return request.ID, nil
+}
+
+func (repo *authRepo) VerifyEmail(email string, verifyCode int) bool {
+	order := &entity.RegisterOrder{}
+	err := repo.db.Where("email=? and verify_code=?", email, verifyCode).First(order).Error
+	if err != nil || order.ID == 0 || order.ExpiresAt.Before(time.Now()) {
+		return false
+	}
+	err = repo.db.Delete(order).Error
+	if err != nil {
+		fmt.Println("Delete register order failed")
+	}
+	return true
+}
+
+func (repo *authRepo) CheckEmailExisted(email string) bool {
+	user := &entity.User{}
+	err := repo.db.Where("email=?", email).First(user).Error
+	if err != nil || user.ID == 0 {
+		return false
+	}
+	return true
 }

@@ -1,11 +1,15 @@
 package auth
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"examples/identity/config"
 	"examples/identity/internal/entity"
+	mailService "examples/identity/internal/service/mail"
+
 	"examples/identity/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +33,7 @@ func (r *router) Register(g *gin.Engine) {
 	{
 		auth.POST("/login", r.login)
 		auth.POST("/register", r.register)
+		auth.POST("/emailVerification", r.emailVerification)
 	}
 	googleAuth := g.Group("/google")
 	{
@@ -67,10 +72,23 @@ func (r *router) googleCallback(c *gin.Context) {
 		})
 		return
 	}
-	mail := userInfo.Header.Get("email")
-	fmt.Println("mail:::::", mail)
-	c.JSON(http.StatusOK, &AuthenResponse{
-		Token: token.AccessToken,
+	body, err := ioutil.ReadAll(userInfo.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "cannot read user info",
+		})
+		return
+	}
+	data := GoogleResponse{}
+	json.Unmarshal([]byte(string(body)), &data)
+	fmt.Println(data.Email)
+
+	isEmailExisted := r.u.CheckEmailExisted(data.Email)
+	if !isEmailExisted {
+		r.u.Register(&entity.User{Email: data.Email, Password: "google"})
+	}
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "register successfully",
 	})
 }
 
@@ -111,15 +129,53 @@ func (r *router) register(c *gin.Context) {
 		})
 		return
 	}
-	id, token, err := r.u.Register(&entity.User{Email: request.Email, Password: request.Password})
-	if err != nil || token == "" {
-		c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": "email is already used",
+	verifyCode := mailService.GenerateVerifyCode()
+	orderId, err := r.u.CreateRegisterOrder(&entity.RegisterOrder{Email: request.Email, VerifyCode: verifyCode})
+	if orderId == 0 || err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Email is already used",
 		})
 		return
 	}
-	c.JSON(http.StatusOK, &AuthenResponse{
-		Token: token,
-		ID:    id,
+	err = mailService.SendEmail(verifyCode, request.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "Cannot send email",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "mail sent, waiting for email verification",
+		"status":  "pending",
+	})
+}
+
+func (r *router) emailVerification(c *gin.Context) {
+	var request RegisterWithVerification
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil || !request.Validate() {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error_message": "Request is invalid",
+		})
+		return
+	}
+	isVerified := r.u.VerifyEmail(request.Email, request.VerifyCode)
+	if !isVerified {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Verify code is invalid",
+		})
+		return
+	}
+	err = r.u.Register(&entity.User{Email: request.Email, Password: request.Password})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "Email is already used",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "register successfully",
+		"status":  "ok",
 	})
 }

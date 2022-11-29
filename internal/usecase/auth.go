@@ -33,17 +33,22 @@ func (u *authUsecase) Login(request *entity.User) (*entity.User, []*entity.Group
 	return user, groups, kahoots, token, nil
 }
 
-func (u *authUsecase) Register(request *entity.User) (uint32, string, error) {
-	id, err := u.repo.Register(request)
+func (u *authUsecase) Register(request *entity.User) error {
+	return u.repo.Register(request)
+}
+
+func (u *authUsecase) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {
+	id, err := u.repo.CreateRegisterOrder(request)
 	if err != nil || id == 0 {
-		return 0, "", err
+		return 0, err
 	}
+	return id, nil
+}
 
-	var token string
+func (u *authUsecase) VerifyEmail(email string, verifyCode int) bool {
+	return u.repo.VerifyEmail(email, verifyCode)
+}
 
-	token, err = u.jwtService.GenerateJWT(request.Email)
-	if err != nil {
-		return 0, "", err
-	}
-	return id, token, nil
+func (u *authUsecase) CheckEmailExisted(email string) bool {
+	return u.repo.CheckEmailExisted(email)
 }

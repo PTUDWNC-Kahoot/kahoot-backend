@@ -4,7 +4,10 @@ import "examples/identity/internal/entity"
 
 type AuthUsecase interface {
 	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, string, error)
-	Register(request *entity.User) (uint32, string, error)
+	Register(request *entity.User) error
+	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
+	VerifyEmail(string, int) bool
+	CheckEmailExisted(string) bool
 }
 type KahootUsecase interface {
 }

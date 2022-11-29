@@ -7,6 +7,12 @@ type AuthenRequest struct {
 	Password string `json:"password"`
 }
 
+type RegisterWithVerification struct {
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	VerifyCode int    `json:"verifyCode"`
+}
+
 type AuthenResponse struct {
 	Token         string           `json:"token"`
 	ID            uint32           `json:"id"`
@@ -18,7 +24,21 @@ type AuthenResponse struct {
 	Kahoots       []*entity.Kahoot `json:"kahoots"`
 }
 
+type GoogleResponse struct {
+	Email           string `json:"email"`
+	Name            string `json:"name"`
+	Picture         string `json:"picture"`
+	IsEmailVerified bool   `json:"isEmailVerified"`
+}
+
 func (a AuthenRequest) Validate() bool {
+	if a.Email == "" || a.Password == "" {
+		return false
+	}
+	return true
+}
+
+func (a RegisterWithVerification) Validate() bool {
 	if a.Email == "" || a.Password == "" {
 		return false
 	}
