@@ -35,7 +35,7 @@ func (service *jwtService) GenerateJWT(email string) (string, error) {
 	claims := customClaims{
 		Email: email,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 60).Unix(),
 			Issuer:    "whatisit",
 		},
 	}

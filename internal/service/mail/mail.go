@@ -13,7 +13,7 @@ const verifyCodeLength = 6
 func SendEmail(verifyCode int, userEmail string) error {
 	msg := gomail.NewMessage()
 	msg.SetHeader("From", "miller.blanda80@ethereal.email")
-	msg.SetHeader("To", "thuy.trinh1@tiki.vn")
+	msg.SetHeader("To", "19120390@student.hcmus.edu.vn")
 	msg.SetHeader("Subject", "<paste the subject of the mail>")
 	msg.SetBody("text/html", "<b>This is the body of the mail</b>")
 

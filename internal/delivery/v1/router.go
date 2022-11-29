@@ -4,7 +4,6 @@ import (
 	"examples/identity/internal/entity"
 	service "examples/identity/internal/service/jwthelper"
 	"examples/identity/internal/usecase"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -21,7 +20,10 @@ type router struct {
 	g         usecase.GroupUsecase
 }
 
-const BEARER_SCHEMA = "Bearer"
+const (
+	BEARER_SCHEMA = "Bearer"
+	FE_HOST       = "http://localhost:3000/join-group/"
+)
 
 func NewRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
 	return &router{
@@ -60,9 +62,8 @@ func (r *router) Register(g *gin.Engine) {
 		group.POST("", r.createGroup)
 		group.PUT("/:id", r.updateGroup)
 		group.DELETE("/:id", r.deleteGroup)
-
+		group.POST("/join-group/:group-code", r.joinGroupByLink)
 	}
-	g.GET("/join-group/:group-code", r.joinGroupByLink)
 }
 
 func (r *router) verifyToken() gin.HandlerFunc {
@@ -75,7 +76,6 @@ func (r *router) verifyToken() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 				"error_message": err.Error(),
 			})
-			fmt.Println(err)
 			return
 		}
 		return
@@ -107,6 +107,9 @@ func (r *router) getByID(c *gin.Context) {
 		})
 		return
 	}
+
+	group.InvitationLink = FE_HOST + group.InvitationLink
+
 	c.JSON(http.StatusOK, group)
 }
 

@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type Role int8
 
 const (
-	Owner Role = iota
+	Owner Role = iota + 1
 	CoOwner
 	Member
 	KickedOut
