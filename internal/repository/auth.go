@@ -9,7 +9,7 @@ import (
 
 	"gorm.io/gorm"
 )
-
+ const defaultAvatar = "https://i.pinimg.com/564x/ec/18/a3/ec18a302c5672470c894939f2cc1a830.jpg"
 type authRepo struct {
 	db *gorm.DB
 }
@@ -47,7 +47,7 @@ func (repo *authRepo) Register(request *entity.User) error {
 	encryptedPass := getMD5Hash(request.Password)
 	kh := entity.Kahoot{ID: 1}
 	repo.db.Debug().Where("ID=?", kh.ID).First(&kh)
-	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass}).Scan(user).Error
+	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass,Name:"kahoot_user",CoverImageURL: ""}).Scan(user).Error
 }
 
 func (repo *authRepo) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {
