@@ -87,8 +87,16 @@ func (r *router) googleCallback(c *gin.Context) {
 	if !isEmailExisted {
 		r.u.Register(&entity.User{Email: data.Email, Password: "google"})
 	}
-	c.JSON(http.StatusOK, map[string]string{
-		"message": "register successfully",
+	user, groups, _, token1, err := r.u.Login(&entity.User{Email: data.Email, Password: "google"})
+	user.Groups = groups
+	c.JSON(http.StatusOK, &AuthenResponse{
+		Token:         token1,
+		ID:            user.ID,
+		Name:          user.Name,
+		Workplace:     user.Workplace,
+		Organization:  user.Organization,
+		CoverImageURL: user.CoverImageURL,
+		Groups:        groups,
 	})
 }
 
