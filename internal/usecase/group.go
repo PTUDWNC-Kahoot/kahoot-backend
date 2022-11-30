@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const FE_HOST = "http://localhost:3000/join-group/"
+
 type groupUsecase struct {
 	repo repo.GroupRepo
 }
@@ -28,9 +30,9 @@ func (g *groupUsecase) Get(id uint32) (*entity.Group, error) {
 
 func (g *groupUsecase) Create(request *entity.Group) (uint32, error) {
 	inviteCode := uuid.New()
-	request.InvitationLink = encode(inviteCode)
+	request.InvitationLink = FE_HOST + encode(inviteCode)
 	return g.repo.CreateOne(request)
-} //generate invitation link
+}
 
 func (g *groupUsecase) Update(request *entity.Group) error {
 	return g.repo.UpdateOne(request)

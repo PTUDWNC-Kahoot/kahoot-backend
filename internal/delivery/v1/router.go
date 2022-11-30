@@ -23,7 +23,7 @@ type router struct {
 
 const (
 	BEARER_SCHEMA = "Bearer"
-	FE_HOST       = "http://localhost:3000/join-group/"
+	
 )
 
 func NewRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
@@ -124,8 +124,6 @@ func (r *router) getByID(c *gin.Context) {
 		})
 		return
 	}
-
-	group.InvitationLink = FE_HOST + group.InvitationLink
 
 	c.JSON(http.StatusOK, group)
 }

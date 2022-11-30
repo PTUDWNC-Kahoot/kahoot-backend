@@ -61,7 +61,7 @@ func (g *groupRepo) DeleteOne(id uint32) error {
 func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity.Group, error) {
 	group := &entity.Group{}
 
-	err := g.db.Where("invitation_link=?", groupCode).First(group).Error
+	err := g.db.Where("invitation_link=?", groupCode).Preload("Users").First(group).Error
 	if group.ID == 0 || err != nil {
 		return nil, err
 	}
