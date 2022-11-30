@@ -28,9 +28,14 @@ func (g *groupRepo) Collection() ([]*entity.Group, error) {
 
 func (g *groupRepo) GetOne(id uint32) (*entity.Group, error) {
 	group := &entity.Group{ID: id}
-	if err := g.db.Preload("Users").First(&group).Error; err != nil {
+	if err := g.db.First(&group).Error; err != nil {
 		return nil, err
 	}
+	members := []*entity.GroupUser{}
+	if err := g.db.Where("group_id=?", id).Find(&members).Error; err != nil {
+		return nil, err
+	}
+	group.Users = members
 
 	return group, nil
 }
@@ -61,7 +66,7 @@ func (g *groupRepo) DeleteOne(id uint32) error {
 func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity.Group, error) {
 	group := &entity.Group{}
 
-	err := g.db.Where("invitation_link=?", groupCode).Preload("Users").First(group).Error
+	err := g.db.Where("invitation_link=?", groupCode).First(group).Error
 	if group.ID == 0 || err != nil {
 		return nil, err
 	}
@@ -73,8 +78,7 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 	}
 
 	existedUser := &entity.GroupUser{}
-	err = g.db.Where("email=?", userEmail).First(existedUser).Error
-	if existedUser.UserID != 0 {
+	if err = g.db.Where("user_id=?", user.ID).First(existedUser).Error; err != nil {
 		return nil, err
 	}
 
@@ -82,6 +86,7 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 		GroupID: group.ID,
 		UserID:  user.ID,
 		Role:    entity.Member,
+		Name:    user.Name,
 	}
 
 	if err := g.db.Model(groupUser).Create(groupUser).Error; err != nil {
@@ -92,10 +97,9 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 }
 
 func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
-	users := []uint32{}
-	fmt.Println("emaillist: ", email_list)
+	users := []*entity.User{}
 	for _, email := range email_list {
-		user := entity.User{}
+		user := &entity.User{}
 		err := g.db.Where("email=?", email).First(&user).Error
 		if err != nil {
 			continue
@@ -106,15 +110,15 @@ func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
 		if existed.UserID != 0 {
 			continue
 		}
-		users = append(users, user.ID)
+		users = append(users, user)
 	}
-	fmt.Println("id_list", users)
 	groupUsers := []*entity.GroupUser{}
-	for _, userID := range users {
+	for _, user := range users {
 		groupUser := &entity.GroupUser{
 			GroupID: groupID,
-			UserID:  userID,
+			UserID:  user.ID,
 			Role:    entity.Member,
+			Name:    user.Name,
 		}
 		groupUsers = append(groupUsers, groupUser)
 	}

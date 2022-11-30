@@ -12,13 +12,13 @@ const (
 )
 
 type Group struct {
-	ID             uint32    `json:"id"`
-	AdminID        uint32    `json:"adminId"`
-	Name           string    `json:"name"`
-	CoverImageURL  string    `json:"coverImageUrl"`
-	InvitationLink string    `json:"invitationLink"`
-	Users          []*User   `json:"users" gorm:"many2many:group_users"`
-	Kahoots        []*Kahoot `json:"kahoots" gorm:"many2many:group_kahoots;"`
+	ID             uint32       `json:"id"`
+	AdminID        uint32       `json:"adminId"`
+	Name           string       `json:"name"`
+	CoverImageURL  string       `json:"coverImageUrl"`
+	InvitationLink string       `json:"invitationLink"`
+	Users          []*GroupUser `json:"users"  gorm:"-"`
+	Kahoots        []*Kahoot    `json:"kahoots" gorm:"many2many:group_kahoots;"`
 	gorm.Model
 }
 
@@ -29,7 +29,8 @@ type Topic struct {
 }
 
 type GroupUser struct {
-	GroupID uint32 `gorm:"primaryKey"`
-	UserID  uint32 `json:"user_id" gorm:"primaryKey"`
+	GroupID uint32 `json:"groupId" gorm:"primaryKey"`
+	UserID  uint32 `json:"userId" gorm:"primaryKey"`
 	Role    Role   `json:"role"`
+	Name    string `json:"name"`
 }
