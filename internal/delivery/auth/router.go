@@ -88,6 +88,12 @@ func (r *router) googleCallback(c *gin.Context) {
 		r.u.Register(&entity.User{Email: data.Email, Password: "google"})
 	}
 	user, _, _, token1, err := r.u.Login(&entity.User{Email: data.Email, Password: "google"})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "cannot login with google",
+		})
+		return
+	}
 	c.JSON(http.StatusOK, &AuthenResponse{
 		Token:         token1,
 		ID:            user.ID,
