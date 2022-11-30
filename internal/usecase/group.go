@@ -51,3 +51,7 @@ func (g *groupUsecase) JoinGroupByLink(userEmail string, groupCode string) (*ent
 func (g *groupUsecase) Invite(email_list []string, groupID uint32) error {
 	return g.repo.Invite(email_list, groupID)
 }
+
+func (g *groupUsecase) AssignRole(groupUser *entity.GroupUser, ownerEmail string) error {
+	return g.repo.AssignRole(groupUser, ownerEmail)
+}

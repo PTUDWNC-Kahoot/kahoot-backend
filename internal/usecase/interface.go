@@ -19,4 +19,5 @@ type GroupUsecase interface {
 	Delete(id uint32) error
 	JoinGroupByLink(string, string) (*entity.Group, error)
 	Invite([]string, uint32) error
+	AssignRole(*entity.GroupUser, string) error
 }

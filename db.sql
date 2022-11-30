@@ -76,8 +76,8 @@ CREATE TABLE "group_kahoots" (
   "status" boolean
 );
 
-CREATE TABLE "group_members" (
+CREATE TABLE "group_users" (
   "group_id" int,
-  "member_id" int,
+  "user_id" int,
   "role" int
 );

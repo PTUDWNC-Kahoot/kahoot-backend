@@ -17,7 +17,7 @@ type Group struct {
 	Name           string    `json:"name"`
 	CoverImageURL  string    `json:"coverImageUrl"`
 	InvitationLink string    `json:"invitationLink"`
-	Users          []*User   `json:"users" gorm:"many2many:group_users;ForeignKey:id;References:id"`
+	Users          []*User   `json:"users" gorm:"many2many:group_users"`
 	Kahoots        []*Kahoot `json:"kahoots" gorm:"many2many:group_kahoots;"`
 	gorm.Model
 }
@@ -28,8 +28,8 @@ type Topic struct {
 	CoverImageUrl string `json:"coverImageUrl"`
 }
 
-type GroupMember struct {
-	GroupID  uint32 `gorm:"primaryKey"`
-	MemberID uint32 `gorm:"primaryKey"`
-	Role     Role   `json:"role"`
+type GroupUser struct {
+	GroupID uint32 `gorm:"primaryKey"`
+	UserID  uint32 `gorm:"primaryKey"`
+	Role    Role   `json:"role"`
 }

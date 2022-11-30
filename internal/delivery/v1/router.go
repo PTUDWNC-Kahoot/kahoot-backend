@@ -65,6 +65,7 @@ func (r *router) Register(g *gin.Engine) {
 		group.DELETE("/:id", r.deleteGroup)
 		group.POST("/join-group/:group-code", r.joinGroupByLink)
 		group.POST("/:id/invite", r.invite)
+		group.PUT("/:id/assign-role", r.assignRole)
 	}
 }
 
@@ -82,6 +83,20 @@ func (r *router) verifyToken() gin.HandlerFunc {
 		}
 		return
 	}
+}
+
+func (r *router) getRequestingEmail(c *gin.Context) string {
+	authHeader := c.GetHeader("Authorization")
+	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
+
+	claims, err := r.jwtHelper.ValidateJWT(tokenString)
+	if err != nil || claims.Email == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+			"error_message": "Do not have permission",
+		})
+		return ""
+	}
+	return claims.Email
 }
 
 func (r *router) getGroups(c *gin.Context) {
@@ -117,7 +132,15 @@ func (r *router) getByID(c *gin.Context) {
 
 func (r *router) createGroup(c *gin.Context) {
 	group := &entity.Group{}
+
 	c.ShouldBindJSON(&group)
+	if group.Name == "" || group.AdminID == 0 {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"message": "request is invalid",
+		})
+		return
+	}
+
 	id, err := r.g.Create(group)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
@@ -186,16 +209,7 @@ func (r *router) deleteGroup(c *gin.Context) {
 
 func (r *router) joinGroupByLink(c *gin.Context) {
 	//check token and get user email to join group
-	authHeader := c.GetHeader("Authorization")
-	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
-
-	claims, err := r.jwtHelper.ValidateJWT(tokenString)
-	if err != nil || claims.Email == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
-			"error_message": err.Error(),
-		})
-		return
-	}
+	requestingEmail := r.getRequestingEmail(c)
 	//group jobs
 	groupCode := c.Param("group-code")
 	if groupCode == "" {
@@ -204,7 +218,7 @@ func (r *router) joinGroupByLink(c *gin.Context) {
 		})
 		return
 	}
-	group, err := r.g.JoinGroupByLink(claims.Email, groupCode)
+	group, err := r.g.JoinGroupByLink(requestingEmail, groupCode)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, map[string]string{
 			"error_message": "unable to join group",
@@ -241,5 +255,38 @@ func (r *router) invite(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, map[string]string{
 		"message": "invited successfully",
+	})
+}
+
+func (r *router) assignRole(c *gin.Context) {
+	groupID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error_message": "invalid request",
+		})
+		return
+	}
+
+	requestingEmail := r.getRequestingEmail(c)
+
+	groupUser := entity.GroupUser{}
+	if err := c.ShouldBindJSON(&groupUser); err != nil {
+		c.JSON(http.StatusBadRequest, map[string]string{
+			"error_message": "invalid request",
+		})
+		return
+	}
+
+	groupUser.GroupID = uint32(groupID)
+
+	if err := r.g.AssignRole(&groupUser, requestingEmail); err != nil {
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"error_message": "unable to assign role",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{
+		"message": "role assigned successfully",
 	})
 }

@@ -28,10 +28,10 @@ func (g *groupRepo) Collection() ([]*entity.Group, error) {
 
 func (g *groupRepo) GetOne(id uint32) (*entity.Group, error) {
 	group := &entity.Group{ID: id}
-	err := g.db.First(&group).Error
-	if err != nil {
+	if err := g.db.Preload("Users").First(&group).Error; err != nil {
 		return nil, err
 	}
+
 	return group, nil
 }
 
@@ -40,10 +40,10 @@ func (g *groupRepo) CreateOne(request *entity.Group) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	err = g.db.Create(&entity.GroupMember{
-		GroupID:  request.ID,
-		MemberID: request.AdminID,
-		Role:     entity.Owner,
+	err = g.db.Create(&entity.GroupUser{
+		GroupID: request.ID,
+		UserID:  request.AdminID,
+		Role:    entity.Owner,
 	}).Error
 	if err != nil {
 		return 0, err
@@ -72,19 +72,19 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 		return nil, err
 	}
 
-	existedMember := &entity.GroupMember{}
-	err = g.db.Where("email=?", userEmail).First(existedMember).Error
-	if existedMember.MemberID != 0 {
+	existedUser := &entity.GroupUser{}
+	err = g.db.Where("email=?", userEmail).First(existedUser).Error
+	if existedUser.UserID != 0 {
 		return nil, err
 	}
 
-	groupMember := &entity.GroupMember{
-		GroupID:  group.ID,
-		MemberID: user.ID,
-		Role:     entity.Member,
+	groupUser := &entity.GroupUser{
+		GroupID: group.ID,
+		UserID:  user.ID,
+		Role:    entity.Member,
 	}
 
-	if err := g.db.Model(groupMember).Create(groupMember).Error; err != nil {
+	if err := g.db.Model(groupUser).Create(groupUser).Error; err != nil {
 		return nil, err
 	}
 
@@ -101,22 +101,42 @@ func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
 			continue
 		}
 
-		existed := &entity.GroupMember{}
-		g.db.Where("member_id=?", user.ID).Where("group_id=?", groupID).First(existed)
-		if existed.MemberID != 0 {
+		existed := &entity.GroupUser{}
+		g.db.Where("user_id=?", user.ID).Where("group_id=?", groupID).First(existed)
+		if existed.UserID != 0 {
 			continue
 		}
 		users = append(users, user.ID)
 	}
 	fmt.Println("id_list", users)
-	groupMembers := []*entity.GroupMember{}
+	groupUsers := []*entity.GroupUser{}
 	for _, userID := range users {
-		groupMember := &entity.GroupMember{
-			GroupID:  groupID,
-			MemberID: userID,
-			Role:     entity.Member,
+		groupUser := &entity.GroupUser{
+			GroupID: groupID,
+			UserID:  userID,
+			Role:    entity.Member,
 		}
-		groupMembers = append(groupMembers, groupMember)
+		groupUsers = append(groupUsers, groupUser)
 	}
-	return g.db.Create(&groupMembers).Error
+	return g.db.Create(&groupUsers).Error
+}
+
+func (g *groupRepo) AssignRole(groupUser *entity.GroupUser, ownerEmail string) error {
+	user := &entity.User{}
+
+	if err := g.db.Where("email=?", ownerEmail).First(user).Error; err != nil {
+		return err
+	}
+
+	owner := &entity.GroupUser{}
+
+	if err := g.db.Where("user_id=?", user.ID).First(owner).Error; err != nil {
+		return err
+	}
+
+	if owner.Role != entity.Owner || owner.UserID == groupUser.UserID {
+		return fmt.Errorf("do not have permission")
+	}
+
+	return g.db.Model(groupUser).Updates(groupUser).Error
 }
