@@ -281,7 +281,7 @@ func (r *router) assignRole(c *gin.Context) {
 
 	if err := r.g.AssignRole(&groupUser, requestingEmail); err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
-			"error_message": "unable to assign role",
+			"error_message": err.Error(),
 		})
 		return
 	}

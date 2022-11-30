@@ -30,6 +30,6 @@ type Topic struct {
 
 type GroupUser struct {
 	GroupID uint32 `gorm:"primaryKey"`
-	UserID  uint32 `gorm:"primaryKey"`
+	UserID  uint32 `json:"user_id" gorm:"primaryKey"`
 	Role    Role   `json:"role"`
 }
