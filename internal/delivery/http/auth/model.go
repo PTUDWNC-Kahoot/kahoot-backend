@@ -1,6 +1,6 @@
 package auth
 
-import "examples/identity/internal/entity"
+import "examples/kahootee/internal/entity"
 
 type AuthenRequest struct {
 	Email    string `json:"email"`

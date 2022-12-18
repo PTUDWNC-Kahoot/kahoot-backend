@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"examples/identity/internal/entity"
-	service "examples/identity/internal/service/jwthelper"
-	"examples/identity/internal/usecase"
+	"examples/kahootee/internal/entity"
+	service "examples/kahootee/internal/service/jwthelper"
+	"examples/kahootee/internal/usecase"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -23,25 +23,19 @@ type router struct {
 
 const (
 	BEARER_SCHEMA = "Bearer"
-	
 )
 
-func NewRouter(s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) Router {
-	return &router{
+func NewRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) {
+	newRouter(handler, s, u, g)
+}
+
+func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) {
+	r := &router{
 		jwtHelper: s,
 		u:         u,
 		g:         g,
 	}
-}
-
-func (r *router) Register(g *gin.Engine) {
-	g.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
-	g.GET("", func(c *gin.Context) {
-		c.JSON(http.StatusOK, map[string]string{
-			"message": "welcome to kahoot",
-		})
-	})
-	user := g.Group("/user")
+	user := handler.Group("/user")
 	user.Use(r.verifyToken())
 	{
 		user.GET("/profile")
@@ -49,13 +43,13 @@ func (r *router) Register(g *gin.Engine) {
 		user.GET("/delete")
 	}
 
-	kahoot := g.Group("/kahoots")
+	kahoot := handler.Group("/kahoots")
 	kahoot.Use(r.verifyToken())
 	{
 		// kahoot.GET("", getKahoots)
 	}
 
-	group := g.Group("/groups")
+	group := handler.Group("/groups")
 	group.Use(r.verifyToken())
 	{
 		group.GET("", r.getGroups)

@@ -2,7 +2,7 @@ package service
 
 import (
 	"errors"
-	"examples/identity/config"
+	"examples/kahootee/config"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"

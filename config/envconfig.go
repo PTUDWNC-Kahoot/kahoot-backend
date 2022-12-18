@@ -11,7 +11,7 @@ import (
 
 func LoadEnvConfig() *Specification {
 
-	viper.SetConfigName("envconfig")
+	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 	viper.AddConfigPath("./")
 	err := viper.ReadInConfig()

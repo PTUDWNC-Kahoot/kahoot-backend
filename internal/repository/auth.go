@@ -3,7 +3,8 @@ package repo
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"examples/identity/internal/entity"
+	"examples/kahootee/internal/entity"
+	"examples/kahootee/internal/usecase"
 	"fmt"
 	"time"
 
@@ -16,7 +17,7 @@ type authRepo struct {
 	db *gorm.DB
 }
 
-func NewAuthRepo(db *gorm.DB) AuthRepo {
+func NewAuthRepo(db *gorm.DB) usecase.AuthRepo {
 	return &authRepo{
 		db: db,
 	}

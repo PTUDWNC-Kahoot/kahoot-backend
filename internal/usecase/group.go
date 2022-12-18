@@ -1,8 +1,7 @@
 package usecase
 
 import (
-	"examples/identity/internal/entity"
-	repo "examples/identity/internal/repository"
+	"examples/kahootee/internal/entity"
 	"math/big"
 
 	"github.com/google/uuid"
@@ -11,10 +10,10 @@ import (
 const FE_HOST = "http://localhost:3000/join-group/"
 
 type groupUsecase struct {
-	repo repo.GroupRepo
+	repo GroupRepo
 }
 
-func NewGroupUsecase(repo repo.GroupRepo) GroupUsecase {
+func NewGroupUsecase(repo GroupRepo) GroupUsecase {
 	return &groupUsecase{
 		repo: repo,
 	}

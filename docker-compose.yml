@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'change_me'
+      POSTGRES_DB: 'kahootee'
+    ports:
+      - 5432:5432
+    profiles:
+      - "dev"
+  app:
+    build: .
+    container_name: app
+    image: app
+    environment:
+      PG_URL: 'postgres://postgres:change_me@postgres:5432/kahootee'
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+volumes:
+  pg-data:
