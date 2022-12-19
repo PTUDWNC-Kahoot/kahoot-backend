@@ -2,14 +2,15 @@ package service
 
 import (
 	"errors"
-	"examples/kahootee/config"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"
+
+	"examples/kahootee/config"
 )
 
 type JWTHelper interface {
-	GenerateJWT(email string) (string, error)
+	GenerateJWT(email string, id uint32) (string, error)
 	ValidateJWT(encodedToken string) (*customClaims, error)
 }
 type jwtService struct {
@@ -19,7 +20,7 @@ type jwtService struct {
 var ErrExpiredToken = errors.New("token has expired")
 
 type customClaims struct {
-	ID    string `json:"id"`
+	ID    uint32 `json:"id"`
 	Email string `json:"email"`
 	jwt.StandardClaims
 }
@@ -31,19 +32,23 @@ func getSecretKey(s *config.Specification) string {
 	}
 	return secret
 }
-func (service *jwtService) GenerateJWT(email string) (string, error) {
+func (service *jwtService) GenerateJWT(email string, id uint32) (string, error) {
 	claims := customClaims{
+		ID:    id,
 		Email: email,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 60).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 			Issuer:    "whatisit",
 		},
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	tokenString, err := token.SignedString([]byte(service.secretKey))
 	if err != nil {
 		return "", err
 	}
+
 	return tokenString, err
 }
 

@@ -3,12 +3,13 @@ package repo
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"examples/kahootee/internal/entity"
-	"examples/kahootee/internal/usecase"
 	"fmt"
 	"time"
 
 	"gorm.io/gorm"
+
+	"examples/kahootee/internal/entity"
+	"examples/kahootee/internal/usecase"
 )
 
 const defaultAvatar = "https://i.pinimg.com/564x/ec/18/a3/ec18a302c5672470c894939f2cc1a830.jpg"
@@ -39,8 +40,12 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 	groups := []*entity.Group{}
 	kahoots := []*entity.Kahoot{}
 
-	repo.db.Model(user).Association("Groups").Find(&groups)
-	repo.db.Model(user).Association("Kahoots").Find(&kahoots)
+	if err := repo.db.Model(user).Association("Groups").Find(&groups); err != nil {
+		return nil, nil, nil, err
+	}
+	if err := repo.db.Model(user).Association("Kahoots").Find(&kahoots); err != nil {
+		return nil, nil, nil, err
+	}
 
 	return user, groups, kahoots, nil
 }
@@ -54,7 +59,7 @@ func (repo *authRepo) Register(request *entity.User) error {
 }
 
 func (repo *authRepo) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {
-	request.ExpiresAt = time.Now().Add(time.Minute * 2)
+	request.ExpiresAt = time.Now().Add(time.Minute * 5)
 	err := repo.db.Debug().Create(request).Error
 	if err != nil {
 		return 0, err

@@ -65,3 +65,17 @@ func Failure(err error) *Response {
 		Message: err.Error(),
 	}
 }
+
+func StatusBadRequest() *Response {
+	return &Response{
+		Status:  http.StatusBadRequest,
+		Message: "Invalid request",
+	}
+}
+
+func Unauthorized() *Response {
+	return &Response{
+		Status:  http.StatusUnauthorized,
+		Message: "Unauthorized",
+	}
+}

@@ -64,7 +64,7 @@ func (g *groupRepo) UpdateOne(request *entity.Group) error {
 func (g *groupRepo) DeleteOne(id uint32) error {
 	return g.db.Delete(&entity.Group{ID: id}).Error
 }
-func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity.Group, error) {
+func (g *groupRepo) JoinGroupByLink(userEmail, groupCode string) (*entity.Group, error) {
 	group := &entity.Group{}
 
 	err := g.db.Where("invitation_link=?", groupCode).First(group).Error
@@ -79,7 +79,7 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 	}
 
 	existedUser := &entity.GroupUser{}
-	if err = g.db.Where("user_id=?", user.ID).First(existedUser).Error; err != nil {
+	if err := g.db.Where("user_id=?", user.ID).First(existedUser).Error; err != nil {
 		return nil, err
 	}
 
@@ -99,6 +99,7 @@ func (g *groupRepo) JoinGroupByLink(userEmail string, groupCode string) (*entity
 
 func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
 	users := []*entity.User{}
+
 	for _, email := range email_list {
 		user := &entity.User{}
 		err := g.db.Where("email=?", email).First(&user).Error
@@ -111,9 +112,12 @@ func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
 		if existed.UserID != 0 {
 			continue
 		}
+
 		users = append(users, user)
 	}
+
 	groupUsers := []*entity.GroupUser{}
+
 	for _, user := range users {
 		groupUser := &entity.GroupUser{
 			GroupID: groupID,
@@ -121,8 +125,10 @@ func (g *groupRepo) Invite(email_list []string, groupID uint32) error {
 			Role:    entity.Member,
 			Name:    user.Name,
 		}
+
 		groupUsers = append(groupUsers, groupUser)
 	}
+
 	return g.db.Create(&groupUsers).Error
 }
 

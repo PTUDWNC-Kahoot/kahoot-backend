@@ -25,7 +25,7 @@ func (u *authUsecase) Login(request *entity.User) (*entity.User, []*entity.Group
 
 	var token string
 
-	token, err = u.jwtService.GenerateJWT(request.Email)
+	token, err = u.jwtService.GenerateJWT(request.Email, user.ID)
 	if err != nil {
 		return nil, nil, nil, "", err
 	}

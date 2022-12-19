@@ -16,5 +16,6 @@ func SetUpConfig() *oauth2.Config {
 		},
 		Endpoint: google.Endpoint,
 	}
+
 	return conf
 }

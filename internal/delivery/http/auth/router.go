@@ -6,13 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"examples/kahootee/config"
 	"examples/kahootee/internal/entity"
 	mailService "examples/kahootee/internal/service/mail"
-
 	"examples/kahootee/internal/usecase"
-
-	"github.com/gin-gonic/gin"
 )
 
 type AuthRouter interface {
@@ -78,12 +77,22 @@ func (r *router) googleCallback(c *gin.Context) {
 		return
 	}
 	data := GoogleResponse{}
-	json.Unmarshal([]byte(string(body)), &data)
-	fmt.Println(data.Email)
+	if err := json.Unmarshal([]byte(string(body)), &data); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": "cannot unmarshal user info",
+		})
+		return
+	}
 
 	isEmailExisted := r.u.CheckEmailExisted(data.Email)
 	if !isEmailExisted {
-		r.u.Register(&entity.User{Email: data.Email, Password: "google"})
+		if err := r.u.Register(&entity.User{Email: data.Email, Password: "google"}); err != nil {
+			c.JSON(http.StatusInternalServerError, map[string]string{
+				"message": "cannot login with google",
+			})
+			return
+		}
 	}
 	user, _, _, token1, err := r.u.Login(&entity.User{Email: data.Email, Password: "google"})
 	if err != nil {
