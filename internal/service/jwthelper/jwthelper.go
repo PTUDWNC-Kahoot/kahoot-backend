@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"
@@ -74,7 +75,7 @@ func (service *jwtService) ValidateJWT(token string) (*customClaims, error) {
 	if !ok {
 		return nil, errors.New("token invalid")
 	}
-
+	fmt.Println("PAYLOAD", payload)
 	return payload, nil
 }
 

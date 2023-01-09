@@ -31,3 +31,11 @@ func (r *userRepo) UpdateProfile(user *entity.User) error {
 func (r *userRepo) DeleteProfile(id uint32) error {
 	return r.db.Delete(&entity.User{}, id).Error
 }
+func (r *userRepo) GetSite(email string) (*entity.User, error) {
+	user := &entity.User{}
+	if err := r.db.Where("email=?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+	user.Password = ""
+	return user, nil
+}

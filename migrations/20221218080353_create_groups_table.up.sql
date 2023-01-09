@@ -1,6 +1,6 @@
 CREATE TABLE "groups" (
   "id" SERIAL PRIMARY KEY,
-  "admin_id" int,
+  "owner" int,
   "name" varchar(50),
   "cover_image_url" text,
   "invitation_link" text,

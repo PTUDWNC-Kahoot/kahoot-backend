@@ -19,18 +19,18 @@ func NewGroupUsecase(repo GroupRepo) GroupUsecase {
 	}
 }
 
-func (g *groupUsecase) GetGroups() ([]*entity.Group, error) {
-	return g.repo.Collection()
+func (g *groupUsecase) GetGroups(userId uint32) ([]*entity.Group, error) {
+	return g.repo.Collection(userId)
 }
 
 func (g *groupUsecase) Get(id uint32) (*entity.Group, error) {
 	return g.repo.GetOne(id)
 }
 
-func (g *groupUsecase) Create(request *entity.Group) (uint32, error) {
+func (g *groupUsecase) Create(request *entity.Group, user *entity.User) (uint32, error) {
 	inviteCode := uuid.New()
 	request.InvitationLink = FE_HOST + encode(inviteCode)
-	return g.repo.CreateOne(request)
+	return g.repo.CreateOne(request, user)
 }
 
 func (g *groupUsecase) Update(request *entity.Group) error {

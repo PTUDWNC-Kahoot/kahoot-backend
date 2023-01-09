@@ -23,3 +23,6 @@ func (u *user) UpdateProfile(user *entity.User) error {
 func (u *user) DeleteProfile(id uint32) error {
 	return u.repo.DeleteProfile(id)
 }
+func (u *user) GetSite(email string) (*entity.User, error) {
+	return u.repo.GetSite(email)
+}

@@ -18,13 +18,16 @@ func NewGroupRepo(db *gorm.DB) usecase.GroupRepo {
 	}
 }
 
-func (g *groupRepo) Collection() ([]*entity.Group, error) {
-	group := []*entity.Group{}
-	err := g.db.Find(&group).Error
-	if err != nil {
+func (g *groupRepo) Collection(userId uint32) ([]*entity.Group, error) {
+	groups := []*entity.Group{}
+	if err := g.db.Model(&entity.Group{}).Joins("left join group_users on group_users.user_id=?", userId).Scan(&groups).Error; err != nil {
 		return nil, err
 	}
-	return group, nil
+	// err := g.db.Find(&group).Where("").Joins("joins group_users ").Error
+	// if err != nil {
+	// 	return nil, err
+	// }
+	return groups, nil
 }
 
 func (g *groupRepo) GetOne(id uint32) (*entity.Group, error) {
@@ -41,15 +44,16 @@ func (g *groupRepo) GetOne(id uint32) (*entity.Group, error) {
 	return group, nil
 }
 
-func (g *groupRepo) CreateOne(request *entity.Group) (uint32, error) {
+func (g *groupRepo) CreateOne(request *entity.Group, user *entity.User) (uint32, error) {
 	err := g.db.Create(&request).Error
 	if err != nil {
 		return 0, err
 	}
 	err = g.db.Create(&entity.GroupUser{
-		GroupID: request.ID,
-		UserID:  request.AdminID,
+		GroupID: user.ID,
+		UserID:  request.Owner,
 		Role:    entity.Owner,
+		Name:    user.Name,
 	}).Error
 	if err != nil {
 		return 0, err

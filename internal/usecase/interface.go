@@ -23,9 +23,9 @@ type AuthRepo interface { //nolint:dupl
 type KahootUsecase interface {
 }
 type GroupUsecase interface { //nolint:dupl
-	GetGroups() ([]*entity.Group, error)
+	GetGroups(userid uint32) ([]*entity.Group, error)
 	Get(id uint32) (*entity.Group, error)
-	Create(request *entity.Group) (uint32, error)
+	Create(request *entity.Group, user *entity.User) (uint32, error)
 	Update(request *entity.Group) error
 	Delete(id uint32) error
 	JoinGroupByLink(string, string) (*entity.Group, error)
@@ -34,9 +34,9 @@ type GroupUsecase interface { //nolint:dupl
 }
 
 type GroupRepo interface { //nolint:dupl
-	Collection() ([]*entity.Group, error)
+	Collection(userId uint32) ([]*entity.Group, error)
 	GetOne(id uint32) (*entity.Group, error)
-	CreateOne(request *entity.Group) (uint32, error)
+	CreateOne(request *entity.Group, user *entity.User) (uint32, error)
 	UpdateOne(request *entity.Group) error
 	DeleteOne(id uint32) error
 	JoinGroupByLink(string, string) (*entity.Group, error)
@@ -51,10 +51,12 @@ type User interface {
 	GetProfile(id uint32) (*entity.User, error)
 	UpdateProfile(user *entity.User) error
 	DeleteProfile(id uint32) error
+	GetSite(email string) (*entity.User, error)
 }
 
 type UserRepo interface {
 	GetProfile(id uint32) (*entity.User, error)
 	UpdateProfile(user *entity.User) error
 	DeleteProfile(id uint32) error
+	GetSite(email string) (*entity.User, error)
 }

@@ -57,11 +57,11 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUs
 		group.GET("", r.getGroups)
 		group.GET("/:id", r.getByID)
 		group.POST("", r.createGroup)
-		group.PUT("/:id", r.updateGroup)
-		group.DELETE("/:id", r.deleteGroup)
 		group.POST("/join-group/:group-code", r.joinGroupByLink)
-		group.POST("/:id/invite", r.invite)
-		group.PUT("/:id/assign-role", r.assignRole)
+		group.PUT("/:id", r.groupMiddleWare, r.updateGroup)
+		group.DELETE("/:id", r.groupMiddleWare, r.deleteGroup)
+		group.POST("/:id/invite", r.groupMiddleWare, r.invite)
+		group.PUT("/:id/assign-role", r.groupMiddleWare, r.assignRole)
 	}
 }
 
@@ -86,17 +86,28 @@ func (r *router) getRequestingUser(c *gin.Context) *entity.User {
 	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
 
 	claims, err := r.jwtHelper.ValidateJWT(tokenString)
-	if err != nil || claims.Email == "" {
+	if err != nil ||claims==nil|| claims.Email == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 			"error_message": "Do not have permission",
 		})
 		return nil
 	}
-	return &entity.User{ID: claims.ID, Email: claims.Email}
+	// user, err := r.p.GetSite(claims.Email)
+	// if err != nil {
+	// 	return nil
+	// }
+	return nil
 }
 
 func (r *router) getGroups(c *gin.Context) {
-	groups, err := r.g.GetGroups()
+	user := r.getRequestingUser(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "unauthorized",
+		})
+		return
+	}
+	groups, err := r.g.GetGroups(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
 			"error_message": err.Error(),
@@ -128,15 +139,28 @@ func (r *router) getByID(c *gin.Context) {
 
 func (r *router) createGroup(c *gin.Context) {
 	group := &entity.Group{}
+	user := r.getRequestingUser(c)
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "unauthorized",
+		})
+		return
+	}
+	if user == nil {
+		c.JSON(http.StatusUnauthorized, map[string]string{
+			"message": "unauthorized",
+		})
+		return
+	}
 
-	if err := c.ShouldBindJSON(&group); err != nil || group.Name == "" || group.AdminID == 0 {
+	if err := c.ShouldBindJSON(&group); err != nil || group.Name == "" {
 		c.JSON(http.StatusBadRequest, map[string]string{
 			"message": "request is invalid",
 		})
 		return
 	}
 
-	id, err := r.g.Create(group)
+	id, err := r.g.Create(group,user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
 			"error_message": err.Error(),
@@ -211,7 +235,7 @@ func (r *router) deleteGroup(c *gin.Context) {
 
 func (r *router) joinGroupByLink(c *gin.Context) {
 	user := r.getRequestingUser(c)
-	if user.ID == 0 {
+	if user == nil {
 		c.JSON(http.StatusUnauthorized, map[string]string{
 			"error_message": "unauthorized",
 		})
@@ -276,7 +300,7 @@ func (r *router) assignRole(c *gin.Context) {
 	}
 
 	user := r.getRequestingUser(c)
-	if user.ID == 0 {
+	if user == nil {
 		c.JSON(http.StatusUnauthorized, map[string]string{
 			"error_message": "unauthorized",
 		})
@@ -307,7 +331,7 @@ func (r *router) assignRole(c *gin.Context) {
 
 func (r *router) getProfile(c *gin.Context) *response.Response {
 	requestingUser := r.getRequestingUser(c)
-	if requestingUser == nil || requestingUser.ID == 0 {
+	if requestingUser == nil {
 		return response.Unauthorized()
 	}
 	fmt.Println("requestingUser:", requestingUser)
@@ -339,7 +363,7 @@ func (r *router) updateProfile(c *gin.Context) *response.Response {
 
 func (r *router) deleteProfile(c *gin.Context) *response.Response {
 	user := r.getRequestingUser(c)
-	if user.ID == 0 {
+	if user == nil {
 		return response.Unauthorized()
 	}
 
