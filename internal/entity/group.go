@@ -12,13 +12,13 @@ const (
 )
 
 type Group struct {
-	ID             uint32       `json:"id"`
-	AdminID        uint32       `json:"adminId"`
-	Name           string       `json:"name"`
-	CoverImageURL  string       `json:"coverImageUrl"`
-	InvitationLink string       `json:"invitationLink"`
-	Users          []*GroupUser `json:"users"  gorm:"-"`
-	Kahoots        []*Kahoot    `json:"kahoots" gorm:"many2many:group_kahoots;"`
+	ID             uint32          `json:"id"`
+	AdminID        uint32          `json:"adminId"`
+	Name           string          `json:"name"`
+	CoverImageURL  string          `json:"coverImageUrl"`
+	InvitationLink string          `json:"invitationLink"`
+	Users          []*GroupUser    `json:"users"  gorm:"-"`
+	Kahoots        []*Presentation `json:"kahoots" gorm:"many2many:group_kahoots;"`
 	gorm.Model
 }
 

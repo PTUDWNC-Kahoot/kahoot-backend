@@ -30,7 +30,7 @@ func getMD5Hash(text string) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, error) {
+func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, error) {
 	user := &entity.User{}
 	encryptedPass := getMD5Hash(request.Password)
 	err := repo.db.Where("email=? and password=?", request.Email, encryptedPass).First(user).Error
@@ -38,7 +38,7 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 		return nil, nil, nil, err
 	}
 	groups := []*entity.Group{}
-	kahoots := []*entity.Kahoot{}
+	kahoots := []*entity.Presentation{}
 
 	if err := repo.db.Model(user).Association("Groups").Find(&groups); err != nil {
 		return nil, nil, nil, err
@@ -53,7 +53,7 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 func (repo *authRepo) Register(request *entity.User) error {
 	user := &entity.User{}
 	encryptedPass := getMD5Hash(request.Password)
-	kh := entity.Kahoot{ID: 1}
+	kh := entity.Presentation{ID: 1}
 	repo.db.Debug().Where("ID=?", kh.ID).First(&kh)
 	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass, Name: "kahoot_user", CoverImageURL: defaultAvatar}).Scan(user).Error
 }

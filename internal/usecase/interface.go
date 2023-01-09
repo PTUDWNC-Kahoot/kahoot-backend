@@ -5,7 +5,7 @@ import (
 )
 
 type AuthUsecase interface { //nolint:dupl
-	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, string, error)
+	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, string, error)
 	Register(request *entity.User) error
 	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
 	VerifyEmail(string, int) bool
@@ -13,7 +13,7 @@ type AuthUsecase interface { //nolint:dupl
 }
 
 type AuthRepo interface { //nolint:dupl
-	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, error)
+	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, error)
 	Register(*entity.User) error
 	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
 	VerifyEmail(string, int) bool

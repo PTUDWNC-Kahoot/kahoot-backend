@@ -7,9 +7,9 @@ services:
     volumes:
       - pg-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: 'change_me'
-      POSTGRES_DB: 'kahootee'
+      POSTGRES_USER: 'nahetbsu'
+      POSTGRES_PASSWORD: '0ntbN-hKF-mOF3_va8OSibMgmceIuKX1'
+      POSTGRES_DB: 'nahetbsu'
     ports:
       - 5432:5432
     profiles:
@@ -19,7 +19,7 @@ services:
     container_name: app
     image: app
     environment:
-      PG_URL: 'postgres://postgres:change_me@postgres:5432/kahootee'
+      PG_URL: 'postgres://nahetbsu:0ntbN-hKF-mOF3_va8OSibMgmceIuKX1@tiny.db.elephantsql.com/nahetbsu'
     ports:
       - 8080:8080
     depends_on:

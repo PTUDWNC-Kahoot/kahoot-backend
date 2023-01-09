@@ -14,14 +14,14 @@ type RegisterWithVerification struct {
 }
 
 type AuthenResponse struct {
-	Token         string           `json:"token"`
-	ID            uint32           `json:"id"`
-	Name          string           `json:"name"`
-	Workplace     string           `json:"workplace"`
-	Organization  string           `json:"organization"`
-	CoverImageURL string           `json:"coverImageUrl"`
-	Groups        []*entity.Group  `json:"groups"`
-	Kahoots       []*entity.Kahoot `json:"kahootsList"`
+	Token         string                 `json:"token"`
+	ID            uint32                 `json:"id"`
+	Name          string                 `json:"name"`
+	Workplace     string                 `json:"workplace"`
+	Organization  string                 `json:"organization"`
+	CoverImageURL string                 `json:"coverImageUrl"`
+	Groups        []*entity.Group        `json:"groups"`
+	Kahoots       []*entity.Presentation `json:"kahootsList"`
 }
 
 type GoogleResponse struct {

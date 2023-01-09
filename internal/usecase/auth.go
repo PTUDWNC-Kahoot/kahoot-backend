@@ -17,7 +17,7 @@ func NewAuthUsecase(repo AuthRepo, jwtService service.JWTHelper) AuthUsecase {
 	}
 }
 
-func (u *authUsecase) Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Kahoot, string, error) {
+func (u *authUsecase) Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, string, error) {
 	user, groups, kahoots, err := u.repo.Login(request)
 	if err != nil || user.ID == 0 {
 		return nil, nil, nil, "", err
