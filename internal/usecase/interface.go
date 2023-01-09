@@ -4,7 +4,7 @@ import (
 	"examples/kahootee/internal/entity"
 )
 
-type AuthUsecase interface { //nolint:dupl
+type Auth interface { //nolint:dupl
 	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, string, error)
 	Register(request *entity.User) error
 	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
@@ -20,9 +20,7 @@ type AuthRepo interface { //nolint:dupl
 	CheckEmailExisted(string) bool
 }
 
-type KahootUsecase interface {
-}
-type GroupUsecase interface { //nolint:dupl
+type Group interface { //nolint:dupl
 	GetGroups(userid uint32) ([]*entity.Group, error)
 	Get(id uint32) (*entity.Group, error)
 	Create(request *entity.Group, user *entity.User) (uint32, error)
@@ -44,9 +42,6 @@ type GroupRepo interface { //nolint:dupl
 	AssignRole(*entity.GroupUser, string) error
 }
 
-type KahootRepo interface {
-}
-
 type User interface {
 	GetProfile(id uint32) (*entity.User, error)
 	UpdateProfile(user *entity.User) error
@@ -59,4 +54,19 @@ type UserRepo interface {
 	UpdateProfile(user *entity.User) error
 	DeleteProfile(id uint32) error
 	GetSite(email string) (*entity.User, error)
+}
+
+type Presentation interface {
+	CreatePresentation(request *entity.Presentation) (uint32, error)
+	GetPresentation(id uint32) (*entity.Presentation, error)
+	Collection(groupId uint32) ([]*entity.Presentation, error)
+	UpdatePresentation(request *entity.Presentation) error
+	DeletePresentation(id uint32,userId uint32) error
+}
+type PresentationRepo interface {
+	CreatePresentation(request *entity.Presentation) (uint32, error)
+	GetPresentation(id uint32) (*entity.Presentation, error)
+	Collection(groupId uint32) ([]*entity.Presentation, error)
+	UpdatePresentation(request *entity.Presentation) error
+	DeletePresentation(id uint32,userId uint32) error
 }

@@ -11,7 +11,7 @@ type authUsecase struct {
 	jwtService service.JWTHelper
 }
 
-func NewAuthUsecase(repo AuthRepo, jwtService service.JWTHelper) AuthUsecase {
+func NewAuthUsecase(repo AuthRepo, jwtService service.JWTHelper) Auth {
 	return &authUsecase{
 		repo:       repo,
 		jwtService: jwtService,

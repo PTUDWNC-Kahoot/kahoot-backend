@@ -53,19 +53,19 @@ func InitializeHttpServer() (*httpserver.Server, func(), error) {
 
 var useCaseSet = wire.NewSet(config.NewConfig, provideGormDB, provideKahootUseCase, provideKahootRepo, provideGroupUseCase, provideGroupRepo, provideAuthUseCase, provideAuthRepo, provideJWTService, provideConfig, usecase.NewUser, repo.NewUserRepo)
 
-func provideKahootRepo(db *gorm.DB) usecase.KahootRepo {
-	return repo.NewKahootRepo(db)
+func provideKahootRepo(db *gorm.DB) usecase.PresentationRepo {
+	return repo.NewPresentationRepo(db)
 }
 
-func provideKahootUseCase(k usecase.KahootRepo) usecase.KahootUsecase {
-	return usecase.NewKahootUsecase(k)
+func provideKahootUseCase(k usecase.PresentationRepo) usecase.Presentation {
+	return usecase.NewPresentation(k)
 }
 
 func provideGroupRepo(db *gorm.DB) usecase.GroupRepo {
 	return repo.NewGroupRepo(db)
 }
 
-func provideGroupUseCase(g usecase.GroupRepo) usecase.GroupUsecase {
+func provideGroupUseCase(g usecase.GroupRepo) usecase.Group {
 	return usecase.NewGroupUsecase(g)
 }
 
@@ -73,7 +73,7 @@ func provideAuthRepo(db *gorm.DB) usecase.AuthRepo {
 	return repo.NewAuthRepo(db)
 }
 
-func provideAuthUseCase(g usecase.AuthRepo, jwtService service.JWTHelper) usecase.AuthUsecase {
+func provideAuthUseCase(g usecase.AuthRepo, jwtService service.JWTHelper) usecase.Auth {
 	return usecase.NewAuthUsecase(g, jwtService)
 }
 

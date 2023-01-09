@@ -18,9 +18,9 @@ import (
 type Router struct {
 	handler *gin.Engine
 	j       service.JWTHelper
-	a       usecase.AuthUsecase
-	k       usecase.KahootUsecase
-	g       usecase.GroupUsecase
+	a       usecase.Auth
+	k       usecase.Presentation
+	g       usecase.Group
 	p       usecase.User
 }
 
@@ -45,7 +45,7 @@ func (r *Router) Register() {
 	auth.NewAuthRouter(r.handler.Group("/"), r.a)
 }
 
-func NewRouter(handler *gin.Engine, jwtHelper service.JWTHelper, a usecase.AuthUsecase, k usecase.KahootUsecase, g usecase.GroupUsecase, p usecase.User) *Router {
+func NewRouter(handler *gin.Engine, jwtHelper service.JWTHelper, a usecase.Auth, k usecase.Presentation, g usecase.Group, p usecase.User) *Router {
 	return &Router{
 		handler: handler,
 		j:       jwtHelper,

@@ -13,7 +13,7 @@ type groupUsecase struct {
 	repo GroupRepo
 }
 
-func NewGroupUsecase(repo GroupRepo) GroupUsecase {
+func NewGroupUsecase(repo GroupRepo) Group {
 	return &groupUsecase{
 		repo: repo,
 	}

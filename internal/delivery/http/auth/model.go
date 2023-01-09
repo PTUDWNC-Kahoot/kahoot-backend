@@ -21,7 +21,7 @@ type AuthenResponse struct {
 	Organization  string                 `json:"organization"`
 	CoverImageURL string                 `json:"coverImageUrl"`
 	Groups        []*entity.Group        `json:"groups"`
-	Kahoots       []*entity.Presentation `json:"kahootsList"`
+	Presentations []*entity.Presentation `json:"presentations"`
 }
 
 type GoogleResponse struct {

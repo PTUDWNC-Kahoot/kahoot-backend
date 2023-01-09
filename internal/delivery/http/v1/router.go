@@ -18,25 +18,26 @@ type Router interface {
 
 type router struct {
 	jwtHelper service.JWTHelper
-	u         usecase.KahootUsecase
-	g         usecase.GroupUsecase
-	p         usecase.User
+	p         usecase.Presentation
+	g         usecase.Group
+	u         usecase.User
 }
 
 const (
-	BEARER_SCHEMA = "Bearer"
+	BEARER_SCHEMA            = "Bearer"
+	DefaultPresentationCover = "https://i.pinimg.com/564x/7e/ff/2d/7eff2dbf4765d9ce581181f5c7002a72.jpg"
 )
 
-func NewRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase,p usecase.User) {
-	newRouter(handler, s, u, g,p)
+func NewRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presentation, g usecase.Group, p usecase.User) {
+	newRouter(handler, s, u, g, p)
 }
 
-func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase, p usecase.User) {
+func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presentation, g usecase.Group, p usecase.User) {
 	r := &router{
 		jwtHelper: s,
-		u:         u,
+		p:         u,
 		g:         g,
-		p:				 p,
+		u:         p,
 	}
 	user := handler.Group("/user")
 	user.Use(r.verifyToken())
@@ -44,12 +45,6 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUs
 		user.GET("/me", response.GinWrap(r.getProfile))
 		user.POST("/update", response.GinWrap(r.updateProfile))
 		user.DELETE("/delete", response.GinWrap(r.deleteProfile))
-	}
-
-	kahoot := handler.Group("/kahoots")
-	kahoot.Use(r.verifyToken())
-	{
-		// kahoot.GET("", getKahoots)
 	}
 
 	group := handler.Group("/groups")
@@ -63,6 +58,18 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUs
 		group.DELETE("/:id", r.groupMiddleWare, r.deleteGroup)
 		group.POST("/:id/invite", r.groupMiddleWare, r.invite)
 		group.PUT("/:id/assign-role", r.groupMiddleWare, r.assignRole)
+		ps := group.Group("/:id/presentations")
+		{
+			ps.POST("", response.GinWrap(r.createPresentation))
+			ps.GET("", response.GinWrap(r.getPresentationList))
+		}
+	}
+
+	ps := handler.Group("/presentations")
+	{
+		ps.GET("/:id", response.GinWrap(r.getPresentation))
+		ps.PUT("/:id", response.GinWrap(r.updatePresentation))
+		ps.DELETE("/:id", response.GinWrap(r.deletePresentation))
 	}
 }
 
@@ -88,16 +95,11 @@ func (r *router) getRequestingUser(c *gin.Context) *entity.User {
 
 	claims, err := r.jwtHelper.ValidateJWT(tokenString)
 	if err != nil || claims == nil || claims.Email == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
-			"error_message": "Do not have permission",
-		})
 		return nil
 	}
-	user, err := r.p.GetSite(claims.Email)
+	user, err := r.u.GetSite(claims.Email)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
-			"error_message": "Do not have permission",
-		})
+		return nil
 	}
 	return user
 }
@@ -339,7 +341,7 @@ func (r *router) getProfile(c *gin.Context) *response.Response {
 	}
 	fmt.Println("requestingUser:", requestingUser)
 
-	user, err := r.p.GetProfile(requestingUser.ID)
+	user, err := r.u.GetProfile(requestingUser.ID)
 	fmt.Println("err:", err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
@@ -357,7 +359,7 @@ func (r *router) updateProfile(c *gin.Context) *response.Response {
 		return response.Failure(err)
 	}
 
-	if err := r.p.UpdateProfile(&user); err != nil {
+	if err := r.u.UpdateProfile(&user); err != nil {
 		return response.Failure(err)
 	}
 
@@ -370,9 +372,104 @@ func (r *router) deleteProfile(c *gin.Context) *response.Response {
 		return response.Unauthorized()
 	}
 
-	if err := r.p.DeleteProfile(user.ID); err != nil {
+	if err := r.u.DeleteProfile(user.ID); err != nil {
 		return response.Failure(err)
 	}
 
 	return response.Success()
+}
+
+func (r *router) createPresentation(c *gin.Context) *response.Response {
+	user := r.getRequestingUser(c)
+	if user == nil {
+		return response.Unauthorized()
+	}
+
+	groupId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
+
+	presentation := &entity.Presentation{}
+
+	if err := c.ShouldBindJSON(&presentation); err != nil {
+		return response.Failure(err)
+	}
+
+	presentation.GroupID = uint32(groupId)
+	presentation.UserID = user.ID
+	if presentation.CoverImageURL == "" {
+		presentation.CoverImageURL = DefaultPresentationCover
+	}
+
+	id, err := r.p.CreatePresentation(presentation)
+	if err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(id)
+}
+
+func (r *router) getPresentation(c *gin.Context) *response.Response {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
+
+	presentation, err := r.p.GetPresentation(uint32(id))
+	if err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(presentation)
+}
+
+func (r *router) updatePresentation(c *gin.Context) *response.Response {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
+
+	presentation := entity.Presentation{}
+	presentation.ID = uint32(id)
+	if err := c.ShouldBindJSON(&presentation); err != nil {
+		return response.StatusBadRequest()
+	}
+
+	if err := r.p.UpdatePresentation(&presentation); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
+}
+
+func (r *router) deletePresentation(c *gin.Context) *response.Response {
+	user := r.getRequestingUser(c)
+	if user == nil {
+		return response.Unauthorized()
+	}
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
+
+	if err := r.p.DeletePresentation(uint32(id), user.ID); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
+}
+
+func (r *router) getPresentationList(c *gin.Context) *response.Response {
+	groupId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
+
+	presentationList, err := r.p.Collection(uint32(groupId))
+	if err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(presentationList)
 }

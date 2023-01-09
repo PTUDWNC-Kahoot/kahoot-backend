@@ -18,7 +18,7 @@ type Group struct {
 	CoverImageURL  string          `json:"coverImageUrl"`
 	InvitationLink string          `json:"invitationLink"`
 	Users          []*GroupUser    `json:"users"  gorm:"-"`
-	Presentation   []*Presentation `json:"kahoots" gorm:"many2many:group_kahoots;"`
+	Presentation   []*Presentation `json:"kahoots" gorm:"many2many:group_presentations;"`
 	gorm.Model
 }
 

@@ -2,12 +2,13 @@ package entity
 
 type Presentation struct {
 	ID            uint32  `json:"id"`
-	UserID        uint32  `json:"userId"`
+	GroupID       uint32  `json:"-"`
+	UserID        uint32  `json:"-"`
 	Title         string  `json:"title"`
 	Description   string  `json:"description"`
 	CoverImageURL string  `json:"coverImageUrl"`
 	Visibility    bool    `json:"visibility"`
-	Slides        []Slide `json:"slides"`
+	Slides        []*Slide `json:"slides"`
 }
 
 type Slide struct {

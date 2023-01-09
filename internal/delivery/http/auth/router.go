@@ -18,14 +18,14 @@ type AuthRouter interface {
 	Register(gr *gin.Engine)
 }
 type router struct {
-	u usecase.AuthUsecase
+	u usecase.Auth
 }
 
-func NewAuthRouter(handler *gin.RouterGroup, u usecase.AuthUsecase) {
+func NewAuthRouter(handler *gin.RouterGroup, u usecase.Auth) {
 	newAuthRouter(handler, u)
 }
 
-func newAuthRouter(handler *gin.RouterGroup, u usecase.AuthUsecase) {
+func newAuthRouter(handler *gin.RouterGroup, u usecase.Auth) {
 	r := &router{
 		u: u,
 	}
@@ -139,7 +139,7 @@ func (r *router) login(c *gin.Context) {
 		Organization:  user.Organization,
 		CoverImageURL: user.CoverImageURL,
 		Groups:        groups,
-		Kahoots:       kahoots,
+		Presentations: kahoots,
 	})
 }
 
