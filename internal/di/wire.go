@@ -6,7 +6,7 @@ package di
 import (
 	"examples/kahootee/config"
 	"examples/kahootee/internal/delivery/http"
-	"examples/kahootee/internal/repository"
+	repo "examples/kahootee/internal/repository"
 	service "examples/kahootee/internal/service/jwthelper"
 	"examples/kahootee/internal/usecase"
 	"examples/kahootee/pkg/httpserver"
@@ -18,7 +18,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var useCaseSet = wire.NewSet(config.NewConfig, provideGormDB, provideKahootUseCase, provideKahootRepo, provideGroupUseCase, provideGroupRepo, provideAuthUseCase, provideAuthRepo, provideJWTService,provideConfig)
+var useCaseSet = wire.NewSet(config.NewConfig, provideGormDB, provideKahootUseCase, provideKahootRepo, provideGroupUseCase, provideGroupRepo, provideAuthUseCase, provideAuthRepo, provideJWTService, provideConfig, usecase.NewUser, repo.NewUserRepo)
 
 func InitializeHttpServer() (*httpserver.Server, func(), error) {
 	panic(wire.Build(

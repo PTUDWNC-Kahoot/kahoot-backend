@@ -40,7 +40,9 @@ func InitializeHttpServer() (*httpserver.Server, func(), error) {
 	kahootUsecase := provideKahootUseCase(kahootRepo)
 	groupRepo := provideGroupRepo(db)
 	groupUsecase := provideGroupUseCase(groupRepo)
-	router := http.NewRouter(engine, jwtHelper, authUsecase, kahootUsecase, groupUsecase)
+	userRepo := repo.NewUserRepo(db)
+	user := usecase.NewUser(userRepo)
+	router := http.NewRouter(engine, jwtHelper, authUsecase, kahootUsecase, groupUsecase, user)
 	server := provideHttpServer(router, engine, configConfig)
 	return server, func() {
 		cleanup()
@@ -49,7 +51,7 @@ func InitializeHttpServer() (*httpserver.Server, func(), error) {
 
 // wire.go:
 
-var useCaseSet = wire.NewSet(config.NewConfig, provideGormDB, provideKahootUseCase, provideKahootRepo, provideGroupUseCase, provideGroupRepo, provideAuthUseCase, provideAuthRepo, provideJWTService, provideConfig)
+var useCaseSet = wire.NewSet(config.NewConfig, provideGormDB, provideKahootUseCase, provideKahootRepo, provideGroupUseCase, provideGroupRepo, provideAuthUseCase, provideAuthRepo, provideJWTService, provideConfig, usecase.NewUser, repo.NewUserRepo)
 
 func provideKahootRepo(db *gorm.DB) usecase.KahootRepo {
 	return repo.NewKahootRepo(db)

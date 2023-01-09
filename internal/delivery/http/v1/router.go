@@ -27,15 +27,16 @@ const (
 	BEARER_SCHEMA = "Bearer"
 )
 
-func NewRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) {
-	newRouter(handler, s, u, g)
+func NewRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase,p usecase.User) {
+	newRouter(handler, s, u, g,p)
 }
 
-func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase) {
+func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.KahootUsecase, g usecase.GroupUsecase, p usecase.User) {
 	r := &router{
 		jwtHelper: s,
 		u:         u,
 		g:         g,
+		p:				 p,
 	}
 	user := handler.Group("/user")
 	user.Use(r.verifyToken())
@@ -86,17 +87,19 @@ func (r *router) getRequestingUser(c *gin.Context) *entity.User {
 	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
 
 	claims, err := r.jwtHelper.ValidateJWT(tokenString)
-	if err != nil ||claims==nil|| claims.Email == "" {
+	if err != nil || claims == nil || claims.Email == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
 			"error_message": "Do not have permission",
 		})
 		return nil
 	}
-	// user, err := r.p.GetSite(claims.Email)
-	// if err != nil {
-	// 	return nil
-	// }
-	return nil
+	user, err := r.p.GetSite(claims.Email)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+			"error_message": "Do not have permission",
+		})
+	}
+	return user
 }
 
 func (r *router) getGroups(c *gin.Context) {
@@ -160,7 +163,7 @@ func (r *router) createGroup(c *gin.Context) {
 		return
 	}
 
-	id, err := r.g.Create(group,user)
+	id, err := r.g.Create(group, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
 			"error_message": err.Error(),
