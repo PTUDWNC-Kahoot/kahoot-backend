@@ -40,7 +40,7 @@ func (r *Router) Register() {
 
 	// Routers
 	v1.NewRouter(r.handler.Group("/v1"), r.j, r.k, r.g)
-	auth.NewAuthRouter(r.handler.Group("/auth"), r.a)
+	auth.NewAuthRouter(r.handler.Group("/"), r.a)
 }
 
 func NewRouter(handler *gin.Engine, jwtHelper service.JWTHelper, a usecase.AuthUsecase, k usecase.KahootUsecase, g usecase.GroupUsecase) *Router {

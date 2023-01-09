@@ -29,9 +29,13 @@ func newAuthRouter(handler *gin.RouterGroup, u usecase.AuthUsecase) {
 	r := &router{
 		u: u,
 	}
-	handler.POST("/login", r.login)
-	handler.POST("/register", r.register)
-	handler.POST("/emailVerification", r.emailVerification)
+	auth := handler.Group("/auth")
+	{
+		auth.POST("/login", r.login)
+		auth.POST("/register", r.register)
+		auth.POST("/emailVerification", r.emailVerification)
+	}
+
 	googleAuth := handler.Group("/google")
 	{
 		googleAuth.GET("/login", r.googleLogin)
