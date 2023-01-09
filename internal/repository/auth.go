@@ -38,26 +38,21 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 		return nil, nil, nil, err
 	}
 	groups := []*entity.Group{}
-	kahoots := []*entity.Presentation{}
-
-	if err := repo.db.Model(user).Association("Groups").Find(&groups); err != nil {
+	presentations := []*entity.Presentation{}
+	if err := repo.db.Model(&groups).Where("admin_id=?", user.ID).Scan(&groups).Error; err != nil {
 		return nil, nil, nil, err
 	}
-	if err := repo.db.Model(user).Association("Kahoots").Find(&kahoots); err != nil {
+	if err := repo.db.Model(&presentations).Where("user_id=?", user.ID).Scan(&presentations).Error; err != nil {
 		return nil, nil, nil, err
 	}
 
-	return user, groups, kahoots, nil
+	return user, groups, presentations, nil
 }
 
 func (repo *authRepo) Register(request *entity.User) error {
 	user := &entity.User{}
 	encryptedPass := getMD5Hash(request.Password)
 	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass, Name: "kahoot_user", CoverImageURL: defaultAvatar}).Scan(user).Error
-}
-func (repo *authRepo) RegisterWithGoogle(request *entity.User) error {
-	user := &entity.User{}
-	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: "", Name: "kahoot_user", CoverImageURL: defaultAvatar}).Scan(user).Error
 }
 
 func (repo *authRepo) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {

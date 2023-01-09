@@ -18,7 +18,7 @@ type User struct {
 	Plays         int8            `json:"plays"`
 	Kahoots       int8            `json:"kahoots"`
 	Groups        []*Group        `json:"groups" gorm:"-"`
-	KahootList    []*Presentation `json:"kahootList" gorm:"-"`
+	Presentations []*Presentation `json:"presentations" gorm:"-"`
 	gorm.Model
 }
 

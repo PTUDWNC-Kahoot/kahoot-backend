@@ -7,7 +7,6 @@ import (
 type AuthUsecase interface { //nolint:dupl
 	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, string, error)
 	Register(request *entity.User) error
-	GoogleRegister(request *entity.User) error
 	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
 	VerifyEmail(string, int) bool
 	CheckEmailExisted(string) bool
@@ -16,7 +15,6 @@ type AuthUsecase interface { //nolint:dupl
 type AuthRepo interface { //nolint:dupl
 	Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, error)
 	Register(*entity.User) error
-	RegisterWithGoogle(request *entity.User) error
 	CreateRegisterOrder(*entity.RegisterOrder) (uint32, error)
 	VerifyEmail(string, int) bool
 	CheckEmailExisted(string) bool
