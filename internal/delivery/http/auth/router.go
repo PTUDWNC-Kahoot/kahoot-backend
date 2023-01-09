@@ -91,7 +91,7 @@ func (r *router) googleCallback(c *gin.Context) {
 
 	isEmailExisted := r.u.CheckEmailExisted(data.Email)
 	if !isEmailExisted {
-		if err := r.u.Register(&entity.User{Email: data.Email, Password: ""}); err != nil {
+		if err := r.u.GoogleRegister(&entity.User{Email: data.Email, Password: ""}); err != nil {
 			c.JSON(http.StatusInternalServerError, map[string]string{
 				"message": "cannot login with google",
 			})

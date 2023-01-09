@@ -53,9 +53,11 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 func (repo *authRepo) Register(request *entity.User) error {
 	user := &entity.User{}
 	encryptedPass := getMD5Hash(request.Password)
-	kh := entity.Presentation{ID: 1}
-	repo.db.Debug().Where("ID=?", kh.ID).First(&kh)
 	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: encryptedPass, Name: "kahoot_user", CoverImageURL: defaultAvatar}).Scan(user).Error
+}
+func (repo *authRepo) RegisterWithGoogle(request *entity.User) error {
+	user := &entity.User{}
+	return repo.db.Debug().Create(&entity.User{Email: request.Email, Password: "", Name: "kahoot_user", CoverImageURL: defaultAvatar}).Scan(user).Error
 }
 
 func (repo *authRepo) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {

@@ -35,6 +35,9 @@ func (u *authUsecase) Login(request *entity.User) (*entity.User, []*entity.Group
 func (u *authUsecase) Register(request *entity.User) error {
 	return u.repo.Register(request)
 }
+func (u *authUsecase) GoogleRegister(request *entity.User) error {
+	return u.repo.RegisterWithGoogle(request)
+}
 
 func (u *authUsecase) CreateRegisterOrder(request *entity.RegisterOrder) (uint32, error) {
 	id, err := u.repo.CreateRegisterOrder(request)
