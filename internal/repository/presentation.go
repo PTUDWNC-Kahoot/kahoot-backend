@@ -26,7 +26,7 @@ func (r presentationRepo) CreatePresentation(request *entity.Presentation) (uint
 
 func (r presentationRepo) GetPresentation(id uint32) (*entity.Presentation, error) {
 	presentation := &entity.Presentation{ID: id}
-	if err := r.db.Preload("Slides").First(&presentation).Error; err != nil {
+	if err := r.db.Preload("Slides").Preload("Slides.Options").First(&presentation).Error; err != nil {
 		return nil, err
 	}
 	return presentation, nil
