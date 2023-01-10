@@ -12,7 +12,7 @@ func NewPresentation(repo PresentationRepo) Presentation {
 	}
 }
 
-func (r presentation) CreatePresentation(request *entity.Presentation) (uint32, error) {
+func (r presentation) CreatePresentation(request *entity.Presentation) error {
 	return r.repo.CreatePresentation(request)
 }
 
@@ -30,4 +30,16 @@ func (r presentation) UpdatePresentation(request *entity.Presentation) error {
 
 func (r presentation) DeletePresentation(id uint32, userId uint32) error {
 	return r.repo.DeletePresentation(id, userId)
+}
+
+func (r presentation) CreateSlide(slide *entity.Slide) error {
+	return r.repo.CreateSlide(slide)
+}
+
+func (r presentation) UpdateSlide(slide *entity.Slide) error {
+	return r.repo.UpdateSlide(slide)
+}
+
+func (r presentation) DeleteSlide(id uint32) error {
+	return r.repo.DeleteSlide(id)
 }

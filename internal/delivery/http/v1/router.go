@@ -70,6 +70,9 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 		ps.GET("/:id", response.GinWrap(r.getPresentation))
 		ps.PUT("/:id", response.GinWrap(r.updatePresentation))
 		ps.DELETE("/:id", response.GinWrap(r.deletePresentation))
+		ps.POST("/:id/slides", response.GinWrap(r.createSlide))
+		ps.PUT("/slides/:id", response.GinWrap(r.updateSlide))
+		ps.DELETE("/slides/:id", response.GinWrap(r.deleteSlide))
 	}
 }
 
@@ -402,12 +405,12 @@ func (r *router) createPresentation(c *gin.Context) *response.Response {
 		presentation.CoverImageURL = DefaultPresentationCover
 	}
 
-	id, err := r.p.CreatePresentation(presentation)
+	err = r.p.CreatePresentation(presentation)
 	if err != nil {
 		return response.Failure(err)
 	}
 
-	return response.SuccessWithData(id)
+	return response.Success()
 }
 
 func (r *router) getPresentation(c *gin.Context) *response.Response {
@@ -472,4 +475,56 @@ func (r *router) getPresentationList(c *gin.Context) *response.Response {
 	}
 
 	return response.SuccessWithData(presentationList)
+}
+
+func (r *router) createSlide(c *gin.Context) *response.Response {
+	presentationId, err := strconv.Atoi(c.Param("id"))
+	if err != nil || presentationId == 0 {
+		return response.StatusBadRequest()
+	}
+
+	slide := &entity.Slide{}
+	if err := c.ShouldBindJSON(slide); err != nil {
+		return response.StatusBadRequest()
+	}
+
+	slide.PresentationID = uint32(presentationId)
+
+	if err := r.p.CreateSlide(slide); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
+}
+
+func (r *router) updateSlide(c *gin.Context) *response.Response {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id == 0 {
+		return response.StatusBadRequest()
+	}
+
+	slide := &entity.Slide{}
+	if err := c.ShouldBindJSON(slide); err != nil {
+		return response.StatusBadRequest()
+	}
+
+	slide.ID = uint32(id)
+
+	if err := r.p.UpdateSlide(slide); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
+}
+func (r *router) deleteSlide(c *gin.Context) *response.Response {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id == 0 {
+		return response.StatusBadRequest()
+	}
+
+	if err := r.p.DeleteSlide(uint32(id)); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
 }

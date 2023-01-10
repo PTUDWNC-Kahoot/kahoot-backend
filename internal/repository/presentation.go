@@ -17,11 +17,8 @@ func NewPresentationRepo(db *gorm.DB) usecase.PresentationRepo {
 	}
 }
 
-func (r presentationRepo) CreatePresentation(request *entity.Presentation) (uint32, error) {
-	if err := r.db.Create(&request).Error; err != nil {
-		return 0, err
-	}
-	return request.ID, nil
+func (r presentationRepo) CreatePresentation(request *entity.Presentation) error {
+	return r.db.Create(&request).Error
 }
 
 func (r presentationRepo) GetPresentation(id uint32) (*entity.Presentation, error) {
@@ -53,4 +50,16 @@ func (r presentationRepo) DeletePresentation(id uint32, userId uint32) error {
 		return err
 	}
 	return nil
+}
+
+func (r presentationRepo) CreateSlide(slide *entity.Slide) error {
+	return r.db.Create(&slide).Error
+}
+
+func (r presentationRepo) UpdateSlide(slide *entity.Slide) error {
+	return r.db.Debug().Updates(&slide).Error
+}
+
+func (r presentationRepo) DeleteSlide(id uint32) error {
+	return r.db.Delete(&entity.Slide{ID: id}).Error
 }

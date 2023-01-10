@@ -57,16 +57,22 @@ type UserRepo interface {
 }
 
 type Presentation interface {
-	CreatePresentation(request *entity.Presentation) (uint32, error)
+	CreatePresentation(request *entity.Presentation) error
 	GetPresentation(id uint32) (*entity.Presentation, error)
 	Collection(groupId uint32) ([]*entity.Presentation, error)
 	UpdatePresentation(request *entity.Presentation) error
-	DeletePresentation(id uint32,userId uint32) error
+	DeletePresentation(id uint32, userId uint32) error
+	CreateSlide(slide *entity.Slide) error
+	UpdateSlide(slide *entity.Slide) error
+	DeleteSlide(id uint32) error
 }
 type PresentationRepo interface {
-	CreatePresentation(request *entity.Presentation) (uint32, error)
+	CreatePresentation(request *entity.Presentation) error
 	GetPresentation(id uint32) (*entity.Presentation, error)
 	Collection(groupId uint32) ([]*entity.Presentation, error)
 	UpdatePresentation(request *entity.Presentation) error
-	DeletePresentation(id uint32,userId uint32) error
+	DeletePresentation(id uint32, userId uint32) error
+	CreateSlide(slide *entity.Slide) error
+	UpdateSlide(slide *entity.Slide) error
+	DeleteSlide(id uint32) error
 }
