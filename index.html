@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Go WebSocket</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <h2>{{ presentation.title }}</h2>
+      <div v-if="presentation.slides && presentation.slides.length">
+        <div v-if="currentSlide">
+          <h4>{{ currentSlide.question }}</h4>
+          <img :src="currentSlide.imageUrl" alt="slide">
+          <ul>
+            <li v-for="option in currentSlide.options">
+              {{ option.content }}
+            </li>
+          </ul>
+        </div>
+        <span id="slide">Slide: {{ index }}/{{presentation.slides.length}}</span>
+        <button @click="handlePrev">Prev</button>
+        <button @click="handleNext">Next</button>
+      </div>
+    </div>
+
+    <script>
+      // const BASE_URL = "http://localhost:8000";
+      // let socket = new WebSocket("ws://localhost:8000/v1/presentations/2/ws");
+      // let index = 1;
+
+      // window.onload = async () => {
+      //   const result = await fetch(`${BASE_URL}/v1/presentations/2`).then((res) => res.json());
+      //   console.log(result);
+      // };
+      // console.log("Attempting Connection...");
+
+      // socket.onopen = () => {
+      //   console.log("Successfully Connected");
+      //   // socket.send("Hi From the Client!");
+      // };
+
+      // socket.onclose = (event) => {
+      //   console.log("Socket Closed Connection: ", event);
+      //   // socket.send("Client Closed!");
+      // };
+
+      // socket.onerror = (error) => {
+      //   console.log("Socket Error: ", error);
+      // };
+
+      // socket.onmessage = (event) => {
+      //   let data = null;
+      //   try {
+      //     data = JSON.parse(event.data);
+      //   } catch {}
+      //   if (data) {
+      //     switch (data.action) {
+      //       case "current_slide":
+      //         handleGotoSlide(data.payload);
+      //         break;
+      //       case "initialize":
+      //         handleInitialize(data.payload);
+      //         break;
+      //     }
+      //   }
+      //   console.log(event);
+      // };
+
+      // function handleGotoSlide(index) {
+      //   const dom = document.getElementById("slide");
+      //   dom.innerText = `Slide: ${index}`;
+      // }
+
+      // function handleInitialize(data) {
+      //   if (data.current_slide) {
+      //     index = data.current_slide;
+      //     handleGotoSlide(index);
+      //   }
+      // }
+
+      // window.onload = () => {
+      //   // button events
+      //   document.getElementById("next-btn").addEventListener("click", (e) => {
+      //     socket.send(
+      //       JSON.stringify({
+      //         action: "current_slide",
+      //         payload: ++index,
+      //       })
+      //     );
+      //   });
+
+      //   document.getElementById("prev-btn").addEventListener("click", (e) => {
+      //     socket.send(
+      //       JSON.stringify({
+      //         action: "current_slide",
+      //         payload: --index,
+      //       })
+      //     );
+      //   });
+      // };
+    </script>
+
+    <script>
+      const BASE_URL = "http://localhost:8000";
+
+      const { createApp } = Vue;
+      createApp({
+        async mounted() {
+          console.log("mounted");
+          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/ws");
+
+          this.socket.onopen = () => {
+            console.log("Successfully Connected");
+          };
+
+          this.socket.onclose = (event) => {
+            console.log("Socket Closed Connection: ", event);
+          };
+
+          this.socket.onmessage = this.handleOnMessage;
+
+          this.presentation = await fetch(`${BASE_URL}/v1/presentations/2`)
+            .then((res) => res.json())
+            .then(({ data }) => data.result)
+            .catch(() => {});
+
+        },
+        data() {
+          return {
+            presentation: {},
+            index: 1,
+            socket: null,
+          };
+        },
+        computed: {
+          totalSlides() {
+            return this.presentation.slides && this.presentation.slides.length
+          },
+          currentSlide() {
+            return this.presentation.slides && this.presentation.slides[this.index-1]
+          }
+        },
+        methods: {
+          handleOnMessage(event) {
+            let data = null;
+            try {
+              data = JSON.parse(event.data);
+            } catch {}
+
+            switch (data.action) {
+              case "current_slide":
+                this.handleCurrentSlide(data.payload)
+                break;
+              case "initialize":
+                this.handleInitialize(data.payload)
+                break
+            }
+            console.log("message", data);
+          },
+          handleInitialize({current_slide}) {
+            if (current_slide) {
+              this.index = current_slide
+            }
+          },
+          handleCurrentSlide(index) {
+            console.log("index", index);
+            this.index = index;
+          },
+          handleNext() {
+            if (this.index + 1 > this.totalSlides) {
+              return
+            }
+
+            this.socket.send(
+              JSON.stringify({
+                action: "current_slide",
+                payload: ++this.index,
+              })
+            );
+          },
+          handlePrev() {
+            if (this.index - 1 == 0) {
+              return
+            }
+
+            this.socket.send(
+              JSON.stringify({
+                action: "current_slide",
+                payload: --this.index,
+              })
+            );
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

