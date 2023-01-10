@@ -15,9 +15,11 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func handleWs(hub *Hub) gin.HandlerFunc {
+func (r *router) handleWs(hub *Hub) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
+		user := r.getUserByToken(c.Query("token"))
 
 		conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 		if err != nil {
@@ -26,7 +28,7 @@ func handleWs(hub *Hub) gin.HandlerFunc {
 
 		presentationID := cast.ToUint32(c.Param("id"))
 
-		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), roomID: presentationID}
+		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), roomID: presentationID, user: user}
 		client.hub.register <- client
 
 		// Allow collection of memory referenced by the caller by doing all work in

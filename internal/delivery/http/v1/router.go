@@ -44,7 +44,7 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 	hub := newHub()
 	go hub.run()
 	// websocket
-	handler.GET("/presentations/:id/ws", handleWs(hub))
+	handler.GET("/presentations/:id/ws", r.handleWs(hub))
 
 	user := handler.Group("/user")
 	user.Use(r.verifyToken())
@@ -120,7 +120,11 @@ func (r *router) getRequestingUser(c *gin.Context) *entity.User {
 	}
 	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
 
-	claims, err := r.jwtHelper.ValidateJWT(tokenString)
+	return r.getUserByToken(tokenString)
+}
+
+func (r *router) getUserByToken(token string) *entity.User {
+	claims, err := r.jwtHelper.ValidateJWT(token)
 	if err != nil || claims == nil || claims.Email == "" {
 		return nil
 	}

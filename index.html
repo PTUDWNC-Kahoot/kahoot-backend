@@ -15,8 +15,9 @@
           <h4>{{ currentSlide.question }}</h4>
           <img :src="currentSlide.imageUrl" alt="slide">
           <ul>
-            <li v-for="option in currentSlide.options">
+            <li v-for="option in currentSlide.options" @click="() => handleSelectOption(option)">
               {{ option.content }}
+              <span v-if="stats[option.id]">{{ stats[option.id] }}/{{ totalAnswers }}</span>
             </li>
           </ul>
         </div>
@@ -110,7 +111,7 @@
       createApp({
         async mounted() {
           console.log("mounted");
-          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/ws");
+          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdEBnbWFpbC5jb20iLCJleHAiOjE2NzM0MzE1ODAsImlzcyI6IndoYXRpc2l0In0.izI2qKNCvrG1jQx71voNtF5UM0qCsXe2ru8W191loII");
 
           this.socket.onopen = () => {
             console.log("Successfully Connected");
@@ -127,12 +128,22 @@
             .then(({ data }) => data.result)
             .catch(() => {});
 
+            this.socket.send(
+              JSON.stringify({
+                action: "goto_slide",
+                payload: {
+                  index: this.index,
+                  slideId: this.currentSlide?.id
+                },
+              })
+            )
         },
         data() {
           return {
             presentation: {},
             index: 1,
             socket: null,
+            stats: {},
           };
         },
         computed: {
@@ -141,6 +152,12 @@
           },
           currentSlide() {
             return this.presentation.slides && this.presentation.slides[this.index-1]
+          },
+          totalAnswers() {
+            return this.stats && Object.values(this.stats).reduce((prev, val) => {
+              prev += val
+              return prev
+            }, 0)
           }
         },
         methods: {
@@ -151,33 +168,56 @@
             } catch {}
 
             switch (data.action) {
-              case "current_slide":
+              case "goto_slide":
                 this.handleCurrentSlide(data.payload)
                 break;
               case "initialize":
                 this.handleInitialize(data.payload)
                 break
+              case "show_result":
+                this.handleShowResult(data.payload)
             }
             console.log("message", data);
           },
           handleInitialize({current_slide}) {
-            if (current_slide) {
-              this.index = current_slide
+            if (current_slide && current_slide.index) {
+              this.index = current_slide.index
             }
           },
-          handleCurrentSlide(index) {
+          handleCurrentSlide({index}) {
             console.log("index", index);
             this.index = index;
+          },
+          handleSelectOption(option) {
+            console.log(option)
+            this.socket.send(
+              JSON.stringify({
+                action: "submit_answer",
+                payload: {
+                  answerId: option.id,
+                  isCorrect: option.isCorrect
+                },
+              })
+            );
+          },
+          handleShowResult({ranking, answers}) {
+            this.stats = answers
+            console.log(ranking, answers)
           },
           handleNext() {
             if (this.index + 1 > this.totalSlides) {
               return
             }
 
+            this.index++
+
             this.socket.send(
               JSON.stringify({
-                action: "current_slide",
-                payload: ++this.index,
+                action: "goto_slide",
+                payload: {
+                  index: this.index,
+                  slideId: this.currentSlide?.id
+                },
               })
             );
           },
@@ -185,11 +225,16 @@
             if (this.index - 1 == 0) {
               return
             }
+            
+            this.index--
 
             this.socket.send(
               JSON.stringify({
-                action: "current_slide",
-                payload: --this.index,
+                action: "goto_slide",
+                payload: {
+                  index: this.index,
+                  slideId: this.currentSlide?.id
+                },
               })
             );
           },

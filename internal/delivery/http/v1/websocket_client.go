@@ -2,6 +2,7 @@ package v1
 
 import (
 	"bytes"
+	"examples/kahootee/internal/entity"
 	"log"
 	"time"
 
@@ -37,6 +38,7 @@ type Client struct {
 	// Buffered channel of outbound messages.
 	send   chan []byte
 	roomID uint32 // presentation id
+	user   *entity.User
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -61,9 +63,11 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- Boardcast{
-			roomID: c.roomID,
-			data:   message,
+		c.hub.broadcast <- Broadcast{
+			roomID:   c.roomID,
+			data:     message,
+			userID:   c.user.ID,
+			Username: c.user.Name,
 		}
 	}
 }
