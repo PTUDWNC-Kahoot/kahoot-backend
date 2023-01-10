@@ -1,12 +1,12 @@
 CREATE TABLE "slides" (
 	"id" SERIAL PRIMARY KEY,
   "presentation_id" int,
+  "time_limit" int,
   "type" int,
   "question" text,
-  "time_limit" int,
   "points" int,
+  "heading" text,
+	"sub_heading" text,    
+	"paragraph" text,  
   "image_url" text,
-  "video_url" text,
-  "title" text,
-  "text" text
 );

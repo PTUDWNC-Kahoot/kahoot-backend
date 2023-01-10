@@ -3,8 +3,9 @@ package entity
 type SlideType int8
 
 const (
-	SlideTypeGeneral SlideType = iota + 1
-	SlideTypeMultipleChoice
+	SlideTypeMultipleChoice    SlideType = iota + 1 // Multiplechoice: Question, Options, Points,Image
+	SlideTypeMultipleParagraph                      // paragraph: heading, paragraph, image
+	SildeTypeHeading                                // heading: heading, subheading, image
 )
 
 type Presentation struct {
@@ -21,15 +22,15 @@ type Presentation struct {
 type Slide struct {
 	ID             uint32    `json:"id"`
 	PresentationID uint32    `json:"presentationId"`
+	TimeLimit      int8      `json:"timeLimit"`
 	Type           SlideType `json:"type"`
 	Question       string    `json:"question"`
-	TimeLimit      int8      `json:"timeLimit"`
-	Points         int8      `json:"points"`
-	ImageURL       string    `json:"imageUrl"`
-	VideoURL       string    `json:"videoUrl"`
 	Options        []*Option `json:"options"`
-	Title          string    `json:"title"`
-	Text           string    `json:"text"`
+	Points         int8      `json:"points"`
+	Heading        string    `json:"heading"`
+	SubHeading     string    `json:"subHeading"`
+	Paragraph      string    `json:"paragraph"`
+	ImageURL       string    `json:"imageUrl"`
 }
 
 type Option struct {
