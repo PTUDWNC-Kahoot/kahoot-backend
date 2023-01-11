@@ -63,9 +63,14 @@ type Presentation interface {
 	MyCollection(userId uint32) ([]*entity.Presentation, error)
 	UpdatePresentation(request *entity.Presentation) error
 	DeletePresentation(id uint32, userId uint32) error
+
 	CreateSlide(slide *entity.Slide) error
 	UpdateSlide(slide *entity.Slide) error
 	DeleteSlide(id uint32) error
+
+	AddCollaborator([]string, uint32) error
+	GetCollaborators(presentationID uint32) ([]*entity.Collaborator, error)
+	RemoveCollaborator(userID, presentationID uint32) error
 }
 type PresentationRepo interface {
 	CreatePresentation(request *entity.Presentation) error
@@ -74,7 +79,12 @@ type PresentationRepo interface {
 	MyCollection(userId uint32) ([]*entity.Presentation, error)
 	UpdatePresentation(request *entity.Presentation) error
 	DeletePresentation(id uint32, userId uint32) error
+
 	CreateSlide(slide *entity.Slide) error
 	UpdateSlide(slide *entity.Slide) error
 	DeleteSlide(id uint32) error
+
+	AddCollaborator([]string, uint32) error
+	GetCollaborators(presentationID uint32) ([]*entity.Collaborator, error)
+	RemoveCollaborator(userID, presentationID uint32) error
 }

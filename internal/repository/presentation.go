@@ -23,7 +23,7 @@ func (r presentationRepo) CreatePresentation(request *entity.Presentation) error
 
 func (r presentationRepo) GetPresentation(id uint32) (*entity.Presentation, error) {
 	presentation := &entity.Presentation{ID: id}
-	if err := r.db.Preload("Slides").Preload("Slides.Options").First(&presentation).Error; err != nil {
+	if err := r.db.Preload("Slides").Preload("Slides.Options").Preload("Collaborators").First(&presentation).Error; err != nil {
 		return nil, err
 	}
 	return presentation, nil
@@ -44,7 +44,6 @@ func (r presentationRepo) MyCollection(userId uint32) ([]*entity.Presentation, e
 	}
 	return presentations, nil
 }
-
 
 func (r presentationRepo) UpdatePresentation(request *entity.Presentation) error {
 	if err := r.db.Save(&request).Error; err != nil {
@@ -73,3 +72,48 @@ func (r presentationRepo) DeleteSlide(id uint32) error {
 	return r.db.Delete(&entity.Slide{ID: id}).Error
 }
 
+func (r presentationRepo) AddCollaborator(emails []string, presentationID uint32) error {
+	users := []*entity.User{}
+
+	for _, email := range emails {
+		user := &entity.User{}
+		err := r.db.Where("email=?", email).First(&user).Error
+		if err != nil {
+			continue
+		}
+
+		existed := &entity.Collaborator{}
+		r.db.Where("user_id=?", user.ID).Where("presentation_id=?", presentationID).First(existed)
+		if existed.UserID != 0 {
+			continue
+		}
+
+		users = append(users, user)
+	}
+
+	collaborators := []*entity.Collaborator{}
+
+	for _, user := range users {
+		c := &entity.Collaborator{
+			UserID:         user.ID,
+			Name:           user.Name,
+			PresentationID: presentationID,
+		}
+
+		collaborators = append(collaborators, c)
+	}
+
+	return r.db.Create(&collaborators).Error
+}
+
+func (r presentationRepo) GetCollaborators(presentationID uint32) ([]*entity.Collaborator, error) {
+	collaborators := []*entity.Collaborator{}
+	if err := r.db.Where("presentation_id=?", presentationID).Find(&collaborators).Error; err != nil {
+		return nil, err
+	}
+	return collaborators, nil
+}
+
+func (r presentationRepo) RemoveCollaborator(userID, presentationID uint32) error {
+	return r.db.Where("user_id=? AND presentation_id=?", userID, presentationID).Delete(&entity.Collaborator{}).Error
+}

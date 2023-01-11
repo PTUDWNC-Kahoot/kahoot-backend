@@ -47,3 +47,15 @@ func (r presentation) UpdateSlide(slide *entity.Slide) error {
 func (r presentation) DeleteSlide(id uint32) error {
 	return r.repo.DeleteSlide(id)
 }
+
+func (r presentation) AddCollaborator(emails []string, presentationID uint32) error {
+	return r.repo.AddCollaborator(emails, presentationID)
+}
+
+func (r presentation) GetCollaborators(presentationID uint32) ([]*entity.Collaborator, error) {
+	return r.repo.GetCollaborators(presentationID)
+}
+
+func (r presentation) RemoveCollaborator(userID, presentationID uint32) error {
+	return r.repo.RemoveCollaborator(userID, presentationID)
+}

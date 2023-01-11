@@ -284,3 +284,13 @@ _Ports and adapters_ are very close to _Clean Architecture_, the differences are
 ## Useful links
 - [The Clean Architecture article](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Twelve factors](https://12factor.net/ru/)
+
+## Migration
+
+This project support database migration by go-migrate package
+
+Create some migrations using migrate CLI
+
+```bash
+make migrate-create name=create_table_name_table
+```

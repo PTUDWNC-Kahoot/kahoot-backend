@@ -54,10 +54,10 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 		group.GET("/:id", r.getByID)
 		group.POST("", r.createGroup)
 		group.POST("/join-group/:group-code", r.joinGroupByLink)
-		group.PUT("/:id", r.groupMiddleWare, r.updateGroup)
-		group.DELETE("/:id", r.groupMiddleWare, r.deleteGroup)
-		group.POST("/:id/invite", r.groupMiddleWare, r.invite)
-		group.PUT("/:id/assign-role", r.groupMiddleWare, r.assignRole)
+		group.PUT("/:id", r.groupOwnerMiddleWare, r.editGroup)
+		group.DELETE("/:id", r.groupOwnerMiddleWare, r.deleteGroup)
+		group.POST("/:id/invite", r.groupOwnerMiddleWare, r.invite)
+		group.PUT("/:id/assign-role", r.groupOwnerMiddleWare, r.assignRole)
 		ps := group.Group("/:id/presentations")
 		{
 			ps.POST("", response.GinWrap(r.createGroupPresentation))
@@ -70,11 +70,14 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 		ps.POST("", response.GinWrap(r.createMyPresentation))
 		ps.GET("", response.GinWrap(r.getMyPresentations))
 		ps.GET("/:id", response.GinWrap(r.getPresentation))
-		ps.PUT("/:id", response.GinWrap(r.updatePresentation))
-		ps.DELETE("/:id", response.GinWrap(r.deletePresentation))
-		ps.POST("/:id/slides", response.GinWrap(r.createSlide))
-		ps.PUT("/slides/:id", response.GinWrap(r.updateSlide))
-		ps.DELETE("/slides/:id", response.GinWrap(r.deleteSlide))
+		ps.POST("/:id/collaborators", response.GinWrap(r.addCollaborator)) //by email
+		ps.GET("/:id/collaborators", response.GinWrap(r.getCollaborators))
+		ps.DELETE("/:id/collaborators/:user-id", response.GinWrap(r.removeCollaborator)) //by user_ID
+		ps.PUT("/:id", r.collabMiddleWare, response.GinWrap(r.editPresentation))
+		ps.DELETE("/:id", r.presentationMiddleWare, response.GinWrap(r.deletePresentation))
+		ps.POST("/:id/slides", r.presentationMiddleWare, response.GinWrap(r.createSlide))
+		ps.PUT("/:id/slides/:slide-id", r.presentationMiddleWare, response.GinWrap(r.editSlide))
+		ps.DELETE("/:id/slides/:slide-id", r.presentationMiddleWare, response.GinWrap(r.deleteSlide))
 	}
 }
 
@@ -197,7 +200,7 @@ func (r *router) createGroup(c *gin.Context) {
 	})
 }
 
-func (r *router) updateGroup(c *gin.Context) {
+func (r *router) editGroup(c *gin.Context) {
 	group := entity.Group{}
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -285,7 +288,6 @@ func (r *router) joinGroupByLink(c *gin.Context) {
 
 func (r *router) invite(c *gin.Context) {
 	groupID, err := strconv.Atoi(c.Param("id"))
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, map[string]string{
 			"error_message": "invalid request",
@@ -450,7 +452,7 @@ func (r *router) getPresentation(c *gin.Context) *response.Response {
 	return response.SuccessWithData(presentation)
 }
 
-func (r *router) updatePresentation(c *gin.Context) *response.Response {
+func (r *router) editPresentation(c *gin.Context) *response.Response {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return response.StatusBadRequest()
@@ -498,7 +500,7 @@ func (r *router) createMyPresentation(c *gin.Context) *response.Response {
 		return response.Failure(err)
 	}
 
-	presentation.UserID = user.ID
+	presentation.Owner = user.ID
 	if presentation.CoverImageURL == "" {
 		presentation.CoverImageURL = DefaultPresentationCover
 	}
@@ -544,8 +546,8 @@ func (r *router) createSlide(c *gin.Context) *response.Response {
 	return response.Success()
 }
 
-func (r *router) updateSlide(c *gin.Context) *response.Response {
-	id, err := strconv.Atoi(c.Param("id"))
+func (r *router) editSlide(c *gin.Context) *response.Response {
+	id, err := strconv.Atoi(c.Param("slide-id"))
 	if err != nil || id == 0 {
 		return response.StatusBadRequest()
 	}
@@ -564,12 +566,60 @@ func (r *router) updateSlide(c *gin.Context) *response.Response {
 	return response.Success()
 }
 func (r *router) deleteSlide(c *gin.Context) *response.Response {
-	id, err := strconv.Atoi(c.Param("id"))
+	id, err := strconv.Atoi(c.Param("slide-id"))
 	if err != nil || id == 0 {
 		return response.StatusBadRequest()
 	}
 
 	if err := r.p.DeleteSlide(uint32(id)); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
+}
+
+func (r *router) addCollaborator(c *gin.Context) *response.Response {
+	presentationId, err := strconv.Atoi(c.Param("id"))
+	if err != nil || presentationId == 0 {
+		return response.StatusBadRequest()
+	}
+	e := EmailList{}
+	if err := c.ShouldBindJSON(&e); err != nil {
+		return response.StatusBadRequest()
+	}
+
+	if err := r.p.AddCollaborator(e.Emails, uint32(presentationId)); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.Success()
+}
+
+func (r *router) getCollaborators(c *gin.Context) *response.Response {
+	presentationId, err := strconv.Atoi(c.Param("id"))
+	if err != nil || presentationId == 0 {
+		return response.StatusBadRequest()
+	}
+
+	collaborators, err := r.p.GetCollaborators(uint32(presentationId))
+	if err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(collaborators)
+}
+
+func (r *router) removeCollaborator(c *gin.Context) *response.Response {
+	presentationId, err := strconv.Atoi(c.Param("id"))
+	if err != nil || presentationId == 0 {
+		return response.StatusBadRequest()
+	}
+	userId, err := strconv.Atoi(c.Param("user-id"))
+	if err != nil || userId == 0 {
+		return response.StatusBadRequest()
+	}
+
+	if err := r.p.RemoveCollaborator(uint32(userId), uint32(presentationId)); err != nil {
 		return response.Failure(err)
 	}
 

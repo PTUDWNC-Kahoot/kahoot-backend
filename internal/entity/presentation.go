@@ -9,14 +9,15 @@ const (
 )
 
 type Presentation struct {
-	ID            uint32   `json:"id"`
-	GroupID       uint32   `json:"-"`
-	UserID        uint32   `json:"-"`
-	Title         string   `json:"title"`
-	Description   string   `json:"description"`
-	CoverImageURL string   `json:"coverImageUrl"`
-	Visibility    bool     `json:"visibility"`
-	Slides        []*Slide `json:"slides"`
+	ID            uint32          `json:"id"`
+	GroupID       uint32          `json:"-"`
+	Owner         uint32          `json:"-"`
+	Title         string          `json:"title"`
+	Description   string          `json:"description"`
+	CoverImageURL string          `json:"coverImageUrl"`
+	Visibility    bool            `json:"visibility"`
+	Slides        []*Slide        `json:"slides"`
+	Collaborators []*Collaborator `json:"collaborators"`
 }
 
 type Slide struct {
@@ -40,4 +41,11 @@ type Option struct {
 	Color     string `json:"color"`
 	Content   string `json:"content"`
 	IsCorrect bool   `json:"isCorrect"`
+}
+
+type Collaborator struct {
+	ID             uint32 `json:"id"`
+	UserID         uint32 `json:"userId"`
+	Name           string `json:"name"`
+	PresentationID uint32 `json:"presentationId"`
 }
