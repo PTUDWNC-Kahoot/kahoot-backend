@@ -128,7 +128,7 @@ func (r *router) login(c *gin.Context) {
 
 	user, groups, kahoots, token, err := r.u.Login(&entity.User{Email: request.Email, Password: request.Password})
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, err)
+		c.JSON(http.StatusNotFound, err)
 		return
 	}
 	c.JSON(http.StatusOK, &AuthenResponse{

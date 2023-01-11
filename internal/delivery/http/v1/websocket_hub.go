@@ -2,10 +2,13 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"math/big"
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -31,21 +34,25 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister    chan *Client
+	code          string
 	presentations map[uint32]map[string]interface{}
 }
 
 func newHub() *Hub {
+	joinCode := genCode()
 	return &Hub{
 		broadcast:     make(chan Broadcast),
 		register:      make(chan *Client),
 		unregister:    make(chan *Client),
 		clients:       make(map[*Client]bool),
+		code:          joinCode,
 		presentations: make(map[uint32]map[string]interface{}),
 	}
 }
 
 type Message struct {
 	Action  string      `json:"action"`
+	Code    string      `json:"code" `
 	Payload interface{} `json:"payload"`
 }
 
@@ -229,4 +236,14 @@ func (h *Hub) broadcastResult(roomID uint32) {
 		roomID: roomID,
 		data:   data,
 	}
+}
+
+func genCode() string {
+	joinCode := uuid.New()
+	code := encode(joinCode)
+	fmt.Println("Room code:", code)
+	return code
+}
+func encode(u uuid.UUID) string {
+	return new(big.Int).SetBytes(u[:]).Text(62)
 }

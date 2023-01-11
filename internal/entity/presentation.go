@@ -23,11 +23,9 @@ type Presentation struct {
 type Slide struct {
 	ID             uint32    `json:"id"`
 	PresentationID uint32    `json:"presentationId"`
-	TimeLimit      int8      `json:"timeLimit"`
 	Type           SlideType `json:"type"`
 	Question       string    `json:"question"`
 	Options        []*Option `json:"options"`
-	Points         int8      `json:"points"`
 	Heading        string    `json:"heading"`
 	SubHeading     string    `json:"subHeading"`
 	Paragraph      string    `json:"paragraph"`

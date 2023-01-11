@@ -39,10 +39,10 @@ func (repo *authRepo) Login(request *entity.User) (*entity.User, []*entity.Group
 	}
 	groups := []*entity.Group{}
 	presentations := []*entity.Presentation{}
-	if err := repo.db.Model(&entity.Group{}).Joins("left join group_users on group_users.user_id=?", user.ID).Scan(&groups).Error; err != nil {
+	if err := repo.db.Debug().Model(&entity.Group{}).Joins("left join group_users on group_users.user_id=?", user.ID).Scan(&groups).Error; err != nil {
 		return nil, nil, nil, err
 	}
-	if err := repo.db.Model(&presentations).Where("user_id=?", user.ID).Scan(&presentations).Error; err != nil {
+	if err := repo.db.Debug().Model(&presentations).Where("owner=?", user.ID).Scan(&presentations).Error; err != nil {
 		return nil, nil, nil, err
 	}
 

@@ -6,7 +6,6 @@ import (
 	service "examples/kahootee/internal/service/jwthelper"
 	"examples/kahootee/internal/usecase"
 	"examples/kahootee/pkg/response"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,7 +43,8 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 	hub := newHub()
 	go hub.run()
 	// websocket
-	handler.GET("/presentations/:id/ws", r.handleWs(hub))
+	handler.GET("/presentations/:id/present", r.presentMiddleWare, r.handlePresent(hub))
+	handler.GET("/presentations/:id/join/:code", r.handleJoin(hub))
 
 	user := handler.Group("/user")
 	user.Use(r.verifyToken())
@@ -176,7 +176,7 @@ func (r *router) getByID(c *gin.Context) {
 func (r *router) createGroup(c *gin.Context) {
 	group := &entity.Group{}
 	user := r.getRequestingUser(c)
-	fmt.Println(user)
+
 	if user == nil {
 		c.JSON(http.StatusUnauthorized, map[string]string{
 			"message": "unauthorized",
@@ -370,10 +370,9 @@ func (r *router) getProfile(c *gin.Context) *response.Response {
 	if requestingUser == nil {
 		return response.Unauthorized()
 	}
-	fmt.Println("requestingUser:", requestingUser)
 
 	user, err := r.u.GetProfile(requestingUser.ID)
-	fmt.Println("err:", err)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, map[string]string{
 			"error_message": err.Error(),
