@@ -20,8 +20,12 @@ func (r presentation) GetPresentation(id uint32) (*entity.Presentation, error) {
 	return r.repo.GetPresentation(id)
 }
 
-func (r presentation) Collection(groupId uint32) ([]*entity.Presentation, error) {
-	return r.repo.Collection(groupId)
+func (r presentation) GroupCollection(groupId uint32) ([]*entity.Presentation, error) {
+	return r.repo.GroupCollection(groupId)
+}
+
+func (r presentation) MyCollection(userId uint32) ([]*entity.Presentation, error) {
+	return r.repo.MyCollection(userId)
 }
 
 func (r presentation) UpdatePresentation(request *entity.Presentation) error {

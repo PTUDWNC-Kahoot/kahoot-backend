@@ -29,13 +29,22 @@ func (r presentationRepo) GetPresentation(id uint32) (*entity.Presentation, erro
 	return presentation, nil
 }
 
-func (r presentationRepo) Collection(groupId uint32) ([]*entity.Presentation, error) {
+func (r presentationRepo) GroupCollection(groupId uint32) ([]*entity.Presentation, error) {
 	presentations := []*entity.Presentation{}
 	if err := r.db.Where("group_id=?", groupId).Find(&presentations).Error; err != nil {
 		return nil, err
 	}
 	return presentations, nil
 }
+
+func (r presentationRepo) MyCollection(userId uint32) ([]*entity.Presentation, error) {
+	presentations := []*entity.Presentation{}
+	if err := r.db.Where("user_id=?", userId).Find(&presentations).Error; err != nil {
+		return nil, err
+	}
+	return presentations, nil
+}
+
 
 func (r presentationRepo) UpdatePresentation(request *entity.Presentation) error {
 	if err := r.db.Save(&request).Error; err != nil {
@@ -63,3 +72,4 @@ func (r presentationRepo) UpdateSlide(slide *entity.Slide) error {
 func (r presentationRepo) DeleteSlide(id uint32) error {
 	return r.db.Delete(&entity.Slide{ID: id}).Error
 }
+

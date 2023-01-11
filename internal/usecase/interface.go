@@ -59,7 +59,8 @@ type UserRepo interface {
 type Presentation interface {
 	CreatePresentation(request *entity.Presentation) error
 	GetPresentation(id uint32) (*entity.Presentation, error)
-	Collection(groupId uint32) ([]*entity.Presentation, error)
+	GroupCollection(groupId uint32) ([]*entity.Presentation, error)
+	MyCollection(userId uint32) ([]*entity.Presentation, error)
 	UpdatePresentation(request *entity.Presentation) error
 	DeletePresentation(id uint32, userId uint32) error
 	CreateSlide(slide *entity.Slide) error
@@ -69,7 +70,8 @@ type Presentation interface {
 type PresentationRepo interface {
 	CreatePresentation(request *entity.Presentation) error
 	GetPresentation(id uint32) (*entity.Presentation, error)
-	Collection(groupId uint32) ([]*entity.Presentation, error)
+	GroupCollection(groupId uint32) ([]*entity.Presentation, error)
+	MyCollection(userId uint32) ([]*entity.Presentation, error)
 	UpdatePresentation(request *entity.Presentation) error
 	DeletePresentation(id uint32, userId uint32) error
 	CreateSlide(slide *entity.Slide) error

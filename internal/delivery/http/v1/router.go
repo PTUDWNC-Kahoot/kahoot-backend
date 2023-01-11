@@ -60,13 +60,15 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 		group.PUT("/:id/assign-role", r.groupMiddleWare, r.assignRole)
 		ps := group.Group("/:id/presentations")
 		{
-			ps.POST("", response.GinWrap(r.createPresentation))
-			ps.GET("", response.GinWrap(r.getPresentationList))
+			ps.POST("", response.GinWrap(r.createGroupPresentation))
+			ps.GET("", response.GinWrap(r.getGroupPresentations))
 		}
 	}
 
 	ps := handler.Group("/presentations")
 	{
+		ps.POST("", response.GinWrap(r.createMyPresentation))
+		ps.GET("", response.GinWrap(r.getMyPresentations))
 		ps.GET("/:id", response.GinWrap(r.getPresentation))
 		ps.PUT("/:id", response.GinWrap(r.updatePresentation))
 		ps.DELETE("/:id", response.GinWrap(r.deletePresentation))
@@ -395,12 +397,7 @@ func (r *router) deleteProfile(c *gin.Context) *response.Response {
 	return response.Success()
 }
 
-func (r *router) createPresentation(c *gin.Context) *response.Response {
-	user := r.getRequestingUser(c)
-	if user == nil {
-		return response.Unauthorized()
-	}
-
+func (r *router) createGroupPresentation(c *gin.Context) *response.Response {
 	groupId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return response.StatusBadRequest()
@@ -413,7 +410,6 @@ func (r *router) createPresentation(c *gin.Context) *response.Response {
 	}
 
 	presentation.GroupID = uint32(groupId)
-	presentation.UserID = user.ID
 	if presentation.CoverImageURL == "" {
 		presentation.CoverImageURL = DefaultPresentationCover
 	}
@@ -423,7 +419,21 @@ func (r *router) createPresentation(c *gin.Context) *response.Response {
 		return response.Failure(err)
 	}
 
-	return response.Success()
+	return response.SuccessWithData(presentation.ID)
+}
+
+func (r *router) getGroupPresentations(c *gin.Context) *response.Response {
+	groupId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
+
+	presentationList, err := r.p.GroupCollection(uint32(groupId))
+	if err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(presentationList)
 }
 
 func (r *router) getPresentation(c *gin.Context) *response.Response {
@@ -476,13 +486,37 @@ func (r *router) deletePresentation(c *gin.Context) *response.Response {
 	return response.Success()
 }
 
-func (r *router) getPresentationList(c *gin.Context) *response.Response {
-	groupId, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return response.StatusBadRequest()
+func (r *router) createMyPresentation(c *gin.Context) *response.Response {
+	user := r.getRequestingUser(c)
+	if user == nil {
+		return response.Unauthorized()
 	}
 
-	presentationList, err := r.p.Collection(uint32(groupId))
+	presentation := &entity.Presentation{}
+
+	if err := c.ShouldBindJSON(&presentation); err != nil {
+		return response.Failure(err)
+	}
+
+	presentation.UserID = user.ID
+	if presentation.CoverImageURL == "" {
+		presentation.CoverImageURL = DefaultPresentationCover
+	}
+
+	if err := r.p.CreatePresentation(presentation); err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(presentation.ID)
+}
+
+func (r *router) getMyPresentations(c *gin.Context) *response.Response {
+	user := r.getRequestingUser(c)
+	if user == nil {
+		return response.Unauthorized()
+	}
+
+	presentationList, err := r.p.MyCollection(uint32(user.ID))
 	if err != nil {
 		return response.Failure(err)
 	}

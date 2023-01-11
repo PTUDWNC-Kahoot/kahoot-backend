@@ -23,10 +23,6 @@ func (g *groupRepo) Collection(userId uint32) ([]*entity.Group, error) {
 	if err := g.db.Model(&entity.Group{}).Joins("left join group_users on group_users.user_id=?", userId).Scan(&groups).Error; err != nil {
 		return nil, err
 	}
-	// err := g.db.Find(&group).Where("").Joins("joins group_users ").Error
-	// if err != nil {
-	// 	return nil, err
-	// }
 	return groups, nil
 }
 
