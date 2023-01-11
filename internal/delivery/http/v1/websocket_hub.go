@@ -114,7 +114,7 @@ func (h *Hub) run() {
 				}
 
 				// setTimeout for response result
-				go h.broadcastResult(b.roomID)
+				go h.broadcastResult(b.roomID, payload.SlideID)
 			}
 
 			if m.Action == "submit_answer" {
@@ -188,7 +188,7 @@ func (h *Hub) run() {
 	}
 }
 
-func (h *Hub) broadcastResult(roomID uint32) {
+func (h *Hub) broadcastResult(roomID uint32, slideID uint32) {
 	time.Sleep(questionTimer + time.Second)
 	ranking, ok := h.presentations[roomID]["ranking"].(map[uint32]*Ranking)
 	if !ok {
@@ -212,6 +212,11 @@ func (h *Hub) broadcastResult(roomID uint32) {
 	currentSlide, ok := h.presentations[roomID]["current_slide"].(*CurrentSlide)
 	if !ok {
 		log.Println("failed to get current slide")
+		return
+	}
+
+	if currentSlide.SlideID != slideID {
+		log.Println("current slide is not the same as the one that was broadcasted")
 		return
 	}
 
