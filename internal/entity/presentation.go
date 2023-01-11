@@ -10,8 +10,8 @@ const (
 
 type Presentation struct {
 	ID            uint32          `json:"id"`
-	GroupID       uint32          `json:"-"`
-	Owner         uint32          `json:"-"`
+	GroupID       uint32          `json:"groupId"`
+	Owner         uint32          `json:"owner"`
 	Title         string          `json:"title"`
 	Code          string          `json:"code"`
 	Description   string          `json:"description"`

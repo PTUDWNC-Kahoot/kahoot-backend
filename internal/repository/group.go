@@ -20,9 +20,10 @@ func NewGroupRepo(db *gorm.DB) usecase.GroupRepo {
 
 func (g *groupRepo) Collection(userId uint32) ([]*entity.Group, error) {
 	groups := []*entity.Group{}
-	if err := g.db.Model(&entity.Group{}).Joins("left join group_users on group_users.user_id=?", userId).Scan(&groups).Error; err != nil {
+	if err := g.db.Debug().Model(&entity.Group{}).Joins("left join group_users on group_users.group_id=groups.id").Where("group_users.user_id=?", userId).Scan(&groups).Error; err != nil {
 		return nil, err
 	}
+
 	return groups, nil
 }
 
