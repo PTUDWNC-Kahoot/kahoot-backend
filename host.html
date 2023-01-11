@@ -9,17 +9,12 @@
   </head>
   <body>
     <div id="app">
+      <h1> {{ presentation.code }}</h1>
       <h2>{{ presentation.title }}</h2>
       <div v-if="presentation.slides && presentation.slides.length">
         <div v-if="currentSlide">
           <h4>{{ currentSlide.question }}</h4>
           <img :src="currentSlide.imageUrl" alt="slide">
-          <ul>
-            <li v-for="option in currentSlide.options" @click="() => handleSelectOption(option)">
-              {{ option.content }}
-              <span v-if="stats[option.id]">{{ stats[option.id] }}/{{ totalAnswers }}</span>
-            </li>
-          </ul>
         </div>
         <span id="slide">Slide: {{ index }}/{{presentation.slides.length}}</span>
         <button @click="handlePrev">Prev</button>
@@ -28,100 +23,14 @@
     </div>
 
     <script>
-      // const BASE_URL = "http://localhost:8000";
-      // let socket = new WebSocket("ws://localhost:8000/v1/presentations/2/ws");
-      // let index = 1;
-
-      // window.onload = async () => {
-      //   const result = await fetch(`${BASE_URL}/v1/presentations/2`).then((res) => res.json());
-      //   console.log(result);
-      // };
-      // console.log("Attempting Connection...");
-
-      // socket.onopen = () => {
-      //   console.log("Successfully Connected");
-      //   // socket.send("Hi From the Client!");
-      // };
-
-      // socket.onclose = (event) => {
-      //   console.log("Socket Closed Connection: ", event);
-      //   // socket.send("Client Closed!");
-      // };
-
-      // socket.onerror = (error) => {
-      //   console.log("Socket Error: ", error);
-      // };
-
-      // socket.onmessage = (event) => {
-      //   let data = null;
-      //   try {
-      //     data = JSON.parse(event.data);
-      //   } catch {}
-      //   if (data) {
-      //     switch (data.action) {
-      //       case "current_slide":
-      //         handleGotoSlide(data.payload);
-      //         break;
-      //       case "initialize":
-      //         handleInitialize(data.payload);
-      //         break;
-      //     }
-      //   }
-      //   console.log(event);
-      // };
-
-      // function handleGotoSlide(index) {
-      //   const dom = document.getElementById("slide");
-      //   dom.innerText = `Slide: ${index}`;
-      // }
-
-      // function handleInitialize(data) {
-      //   if (data.current_slide) {
-      //     index = data.current_slide;
-      //     handleGotoSlide(index);
-      //   }
-      // }
-
-      // window.onload = () => {
-      //   // button events
-      //   document.getElementById("next-btn").addEventListener("click", (e) => {
-      //     socket.send(
-      //       JSON.stringify({
-      //         action: "current_slide",
-      //         payload: ++index,
-      //       })
-      //     );
-      //   });
-
-      //   document.getElementById("prev-btn").addEventListener("click", (e) => {
-      //     socket.send(
-      //       JSON.stringify({
-      //         action: "current_slide",
-      //         payload: --index,
-      //       })
-      //     );
-      //   });
-      // };
-    </script>
-
-    <script>
       const BASE_URL = "http://localhost:8000";
+      const PUBLIC_URL = "http://54.179.150.210:8000";
 
       const { createApp } = Vue;
       createApp({
         async mounted() {
           console.log("mounted");
-
-          this.presentation = await fetch(`${BASE_URL}/v1/presentations/code/fdgdfg`)
-            .then((res) => res.json())
-            .then(({ data }) => data.result)
-            .catch(() => {});
-
-            if (!this.presentation.id) {
-              return
-            }
-
-            this.socket = new WebSocket("ws://localhost:8000/v1/presentations/"+this.presentation.id+"/join?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdDEyM0BnbWFpbC5jb20iLCJleHAiOjE2NzM1MTgwMDIsImlzcyI6IndoYXRpc2l0In0.3RfUg2KtXZN_EMVmOQBd6IwhU5FE4EeaPoUqnK2xkqw");
+          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/present?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdEBnbWFpbC5jb20iLCJleHAiOjE2NzM1MTc5MjAsImlzcyI6IndoYXRpc2l0In0.Xso6-PWJPPNRbYWwsjtdCxU2q4wpoCL1UkQMk9U-vB8");
           
           this.socket.onopen = () => {
             console.log("Successfully Connected");
@@ -132,6 +41,11 @@
           };
 
           this.socket.onmessage = this.handleOnMessage;
+
+          this.presentation = await fetch(`${PUBLIC_URL}/v1/presentations/2`)
+            .then((res) => res.json())
+            .then(({ data }) => data.result)
+            .catch(() => {});
 
             this.socket.send(
               JSON.stringify({
