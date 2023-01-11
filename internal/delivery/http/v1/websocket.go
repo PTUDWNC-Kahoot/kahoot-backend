@@ -42,7 +42,6 @@ func (r *router) handlePresent(hub *Hub) gin.HandlerFunc {
 		if data != nil {
 			rawData, err := json.Marshal(Message{
 				Action:  "initialize",
-				Code:    hub.code,
 				Payload: data,
 			})
 
@@ -69,12 +68,12 @@ func (r *router) handleJoin(hub *Hub) gin.HandlerFunc {
 
 		presentationID := cast.ToUint32(c.Param("id"))
 
-		code := c.Param("code")
-		if hub.code != code {
-			conn.WriteMessage(websocket.TextMessage, []byte("wrong code"))
-			conn.Close()
-			return
-		}
+		// code := c.Param("code")
+		// if hub.code != code {
+		// 	conn.WriteMessage(websocket.TextMessage, []byte("wrong code"))
+		// 	conn.Close()
+		// 	return
+		// }
 
 		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), roomID: presentationID, user: user}
 		client.hub.register <- client

@@ -111,7 +111,17 @@
       createApp({
         async mounted() {
           console.log("mounted");
-          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/present?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdEBnbWFpbC5jb20iLCJleHAiOjE2NzM1MTc5MjAsImlzcyI6IndoYXRpc2l0In0.Xso6-PWJPPNRbYWwsjtdCxU2q4wpoCL1UkQMk9U-vB8");
+
+          this.presentation = await fetch(`${BASE_URL}/v1/presentations/code/fdgdfg`)
+            .then((res) => res.json())
+            .then(({ data }) => data.result)
+            .catch(() => {});
+
+            if (!this.presentation.id) {
+              return
+            }
+
+            this.socket = new WebSocket("ws://localhost:8000/v1/presentations/"+this.presentation.id+"/join?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdDEyM0BnbWFpbC5jb20iLCJleHAiOjE2NzM1MTgwMDIsImlzcyI6IndoYXRpc2l0In0.3RfUg2KtXZN_EMVmOQBd6IwhU5FE4EeaPoUqnK2xkqw");
           
           this.socket.onopen = () => {
             console.log("Successfully Connected");
@@ -122,11 +132,6 @@
           };
 
           this.socket.onmessage = this.handleOnMessage;
-
-          this.presentation = await fetch(`${BASE_URL}/v1/presentations/2`)
-            .then((res) => res.json())
-            .then(({ data }) => data.result)
-            .catch(() => {});
 
             this.socket.send(
               JSON.stringify({

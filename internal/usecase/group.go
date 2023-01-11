@@ -29,7 +29,7 @@ func (g *groupUsecase) Get(id uint32) (*entity.Group, error) {
 
 func (g *groupUsecase) Create(request *entity.Group, user *entity.User) (uint32, error) {
 	inviteCode := uuid.New()
-	request.InvitationLink = FE_HOST + encode(inviteCode)
+	request.InvitationLink = FE_HOST + g.encode(inviteCode)
 	return g.repo.CreateOne(request, user)
 }
 
@@ -41,7 +41,7 @@ func (g *groupUsecase) Delete(id uint32) error {
 	return g.repo.DeleteOne(id)
 }
 
-func encode(u uuid.UUID) string {
+func (g *groupUsecase) encode(u uuid.UUID) string {
 	return new(big.Int).SetBytes(u[:]).Text(62)
 }
 

@@ -13,6 +13,7 @@ type Presentation struct {
 	GroupID       uint32          `json:"-"`
 	Owner         uint32          `json:"-"`
 	Title         string          `json:"title"`
+	Code          string          `json:"code"`
 	Description   string          `json:"description"`
 	CoverImageURL string          `json:"coverImageUrl"`
 	Visibility    bool            `json:"visibility"`

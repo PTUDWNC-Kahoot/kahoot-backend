@@ -1,6 +1,12 @@
 package usecase
 
-import "examples/kahootee/internal/entity"
+import (
+	"examples/kahootee/internal/entity"
+	"fmt"
+	"math/big"
+
+	"github.com/google/uuid"
+)
 
 type presentation struct {
 	repo PresentationRepo
@@ -13,11 +19,17 @@ func NewPresentation(repo PresentationRepo) Presentation {
 }
 
 func (r presentation) CreatePresentation(request *entity.Presentation) error {
+	code := genCode()
+	request.Code = code
 	return r.repo.CreatePresentation(request)
 }
 
 func (r presentation) GetPresentation(id uint32) (*entity.Presentation, error) {
 	return r.repo.GetPresentation(id)
+}
+
+func (r presentation) GetPresentationByCode(code string) (*entity.Presentation, error) {
+	return r.repo.GetPresentationByCode(code)
 }
 
 func (r presentation) GroupCollection(groupId uint32) ([]*entity.Presentation, error) {
@@ -58,4 +70,14 @@ func (r presentation) GetCollaborators(presentationID uint32) ([]*entity.Collabo
 
 func (r presentation) RemoveCollaborator(userID, presentationID uint32) error {
 	return r.repo.RemoveCollaborator(userID, presentationID)
+}
+
+func genCode() string {
+	joinCode := uuid.New()
+	code := encode(joinCode)
+	fmt.Println("Room code:", code)
+	return code
+}
+func encode(u uuid.UUID) string {
+	return new(big.Int).SetBytes(u[:]).Text(62)
 }

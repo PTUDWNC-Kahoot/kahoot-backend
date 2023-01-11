@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"encoding/json"
 	"examples/kahootee/internal/entity"
 	service "examples/kahootee/internal/service/jwthelper"
 	"examples/kahootee/internal/usecase"
@@ -44,7 +43,7 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 	go hub.run()
 	// websocket
 	handler.GET("/presentations/:id/present", r.presentMiddleWare, r.handlePresent(hub))
-	handler.GET("/presentations/:id/join/:code", r.handleJoin(hub))
+	handler.GET("/presentations/:id/join", r.handleJoin(hub))
 
 	user := handler.Group("/user")
 	user.Use(r.verifyToken())
@@ -77,6 +76,7 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 		ps.POST("", response.GinWrap(r.createMyPresentation))
 		ps.GET("", response.GinWrap(r.getMyPresentations))
 		ps.GET("/:id", response.GinWrap(r.getPresentation))
+		ps.GET("/code/:code", response.GinWrap(r.getPresentationByCode))
 		ps.POST("/:id/collaborators", response.GinWrap(r.addCollaborator)) //by email
 		ps.GET("/:id/collaborators", response.GinWrap(r.getCollaborators))
 		ps.DELETE("/:id/collaborators/:user-id", response.GinWrap(r.removeCollaborator)) //by user_ID
@@ -449,82 +449,30 @@ func (r *router) getGroupPresentations(c *gin.Context) *response.Response {
 }
 
 func (r *router) getPresentation(c *gin.Context) *response.Response {
-	// id, err := strconv.Atoi(c.Param("id"))
-	// if err != nil {
-	// 	return response.StatusBadRequest()
-	// }
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return response.StatusBadRequest()
+	}
 
-	// presentation, err := r.p.GetPresentation(uint32(id))
-	// if err != nil {
-	// 	return response.Failure(err)
-	// }
+	presentation, err := r.p.GetPresentation(uint32(id))
+	if err != nil {
+		return response.Failure(err)
+	}
 
-	rawJson := `{
-		"coverImageUrl": "https://i.pinimg.com/564x/7e/ff/2d/7eff2dbf4765d9ce581181f5c7002a72.jpg",
-		"description": "Hello this is presentation 1",
-		"id": 2,
-		"slides": [
-			{
-				"id": 3,
-				"imageUrl": "https://i.pinimg.com/564x/c9/d5/49/c9d549ea6915fca15e10160453bbd3f9.jpg",
-				"options": [],
-				"points": 10,
-				"presentationId": 2,
-				"question": "",
-				"text": "Slide binh thuong lam",
-				"timeLimit": 0,
-				"title": "Silde so 3",
-				"type": 1,
-				"videoUrl": ""
-			},
-			{
-				"id": 4,
-				"imageUrl": "https://i.pinimg.com/564x/c9/d5/49/c9d549ea6915fca15e10160453bbd3f9.jpg",
-				"options": [
-					{
-						"color": "",
-						"content": "Qua met",
-						"id": 4,
-						"imageUrl": "",
-						"isCorrect": true,
-						"slideID": 4
-					},
-					{
-						"color": "",
-						"content": "Met qua",
-						"id": 5,
-						"imageUrl": "",
-						"isCorrect": true,
-						"slideID": 4
-					},
-					{
-						"color": "",
-						"content": "Khong met",
-						"id": 6,
-						"imageUrl": "",
-						"isCorrect": false,
-						"slideID": 4
-					}
-				],
-				"points": 10,
-				"presentationId": 2,
-				"question": "Ban met khong? 3",
-				"text": "Slide binh thuong lam",
-				"timeLimit": 0,
-				"title": "Silde so 1",
-				"type": 2,
-				"videoUrl": ""
-			}
-		],
-		"title": "Presentation updated",
-		"visibility": false
-	}`
-
-	data := map[string]interface{}{}
-	json.Unmarshal([]byte(rawJson), &data)
-
-	return response.SuccessWithData(data)
+	return response.SuccessWithData(presentation)
 }
+
+func (r *router) getPresentationByCode(c *gin.Context) *response.Response {
+	code:= c.Param("code")
+
+	presentation, err := r.p.GetPresentationByCode(code)
+	if err != nil {
+		return response.Failure(err)
+	}
+
+	return response.SuccessWithData(presentation)
+}
+
 
 func (r *router) editPresentation(c *gin.Context) *response.Response {
 	id, err := strconv.Atoi(c.Param("id"))

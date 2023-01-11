@@ -9,6 +9,7 @@
   </head>
   <body>
     <div id="app">
+      <h1> {{ presentation.code }}</h1>
       <h2>{{ presentation.title }}</h2>
       <div v-if="presentation.slides && presentation.slides.length">
         <div v-if="currentSlide">
@@ -111,7 +112,7 @@
       createApp({
         async mounted() {
           console.log("mounted");
-          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/join?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdDEyM0BnbWFpbC5jb20iLCJleHAiOjE2NzM1MTgwMDIsImlzcyI6IndoYXRpc2l0In0.3RfUg2KtXZN_EMVmOQBd6IwhU5FE4EeaPoUqnK2xkqw");
+          this.socket = new WebSocket("ws://localhost:8000/v1/presentations/2/join?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJIZWxsb0thaG9vdEBnbWFpbC5jb20iLCJleHAiOjE2NzM1MTc5MjAsImlzcyI6IndoYXRpc2l0In0.Xso6-PWJPPNRbYWwsjtdCxU2q4wpoCL1UkQMk9U-vB8");
           
           this.socket.onopen = () => {
             console.log("Successfully Connected");

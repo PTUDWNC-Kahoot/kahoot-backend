@@ -29,6 +29,14 @@ func (r presentationRepo) GetPresentation(id uint32) (*entity.Presentation, erro
 	return presentation, nil
 }
 
+func (r presentationRepo) GetPresentationByCode(code string) (*entity.Presentation, error) {
+	presentation := &entity.Presentation{}
+	if err := r.db.Preload("Slides").Preload("Slides.Options").Preload("Collaborators").Where("code=?",code).First(&presentation).Error; err != nil {
+		return nil, err
+	}
+	return presentation, nil
+}
+
 func (r presentationRepo) GroupCollection(groupId uint32) ([]*entity.Presentation, error) {
 	presentations := []*entity.Presentation{}
 	if err := r.db.Where("group_id=?", groupId).Find(&presentations).Error; err != nil {
