@@ -45,13 +45,14 @@ func (g *groupRepo) GetOne(id uint32) (*entity.Group, error) {
 }
 
 func (g *groupRepo) CreateOne(request *entity.Group, user *entity.User) (uint32, error) {
+	request.Owner = user.ID
 	err := g.db.Create(&request).Error
 	if err != nil {
 		return 0, err
 	}
 	err = g.db.Create(&entity.GroupUser{
-		GroupID: user.ID,
-		UserID:  request.Owner,
+		GroupID: request.ID,
+		UserID:  user.ID,
 		Role:    entity.Owner,
 		Name:    user.Name,
 	}).Error

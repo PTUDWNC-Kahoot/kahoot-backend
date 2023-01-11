@@ -8,5 +8,5 @@ CREATE TABLE "slides" (
   "heading" text,
 	"sub_heading" text,    
 	"paragraph" text,  
-  "image_url" text,
+  "image_url" text
 );

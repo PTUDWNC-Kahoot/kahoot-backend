@@ -79,6 +79,12 @@ func newRouter(handler *gin.RouterGroup, s service.JWTHelper, u usecase.Presenta
 func (r *router) verifyToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+				"error_message": "Unauthorized",
+			})
+			return
+		}
 		tokenString := authHeader[len(BEARER_SCHEMA)+1:]
 
 		_, err := r.jwtHelper.ValidateJWT(tokenString)
@@ -94,6 +100,12 @@ func (r *router) verifyToken() gin.HandlerFunc {
 
 func (r *router) getRequestingUser(c *gin.Context) *entity.User {
 	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, map[string]string{
+			"error_message": "Unauthorized",
+		})
+		return nil
+	}
 	tokenString := authHeader[len(BEARER_SCHEMA)+1:]
 
 	claims, err := r.jwtHelper.ValidateJWT(tokenString)
@@ -148,6 +160,7 @@ func (r *router) getByID(c *gin.Context) {
 func (r *router) createGroup(c *gin.Context) {
 	group := &entity.Group{}
 	user := r.getRequestingUser(c)
+	fmt.Println(user)
 	if user == nil {
 		c.JSON(http.StatusUnauthorized, map[string]string{
 			"message": "unauthorized",
