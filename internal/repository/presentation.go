@@ -47,7 +47,7 @@ func (r presentationRepo) GroupCollection(groupId uint32) ([]*entity.Presentatio
 
 func (r presentationRepo) MyCollection(userId uint32) ([]*entity.Presentation, error) {
 	presentations := []*entity.Presentation{}
-	if err := r.db.Where("user_id=?", userId).Find(&presentations).Error; err != nil {
+	if err := r.db.Where("owner=?", userId).Find(&presentations).Error; err != nil {
 		return nil, err
 	}
 	return presentations, nil
