@@ -5,7 +5,6 @@ import (
 	service "examples/kahootee/internal/service/jwthelper"
 	"examples/kahootee/internal/usecase"
 	"examples/kahootee/pkg/response"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -288,9 +287,8 @@ func (r *router) joinGroupByLink(c *gin.Context) {
 		return
 	}
 	group, err := r.g.JoinGroupByLink(user.Email, groupCode)
-	fmt.Println("group", group)
 	if err != nil {
-		c.JSON(http.StatusNotFound, map[string]string{
+		c.JSON(http.StatusBadRequest, map[string]string{
 			"error_message": "unable to join group",
 		})
 		return
@@ -465,7 +463,7 @@ func (r *router) getPresentation(c *gin.Context) *response.Response {
 }
 
 func (r *router) getPresentationByCode(c *gin.Context) *response.Response {
-	code := c.Param("code")
+	code:= c.Param("code")
 
 	presentation, err := r.p.GetPresentationByCode(code)
 	if err != nil {
@@ -474,6 +472,7 @@ func (r *router) getPresentationByCode(c *gin.Context) *response.Response {
 
 	return response.SuccessWithData(presentation)
 }
+
 
 func (r *router) editPresentation(c *gin.Context) *response.Response {
 	id, err := strconv.Atoi(c.Param("id"))
