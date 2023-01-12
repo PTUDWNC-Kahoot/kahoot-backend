@@ -68,20 +68,21 @@ func (g *groupRepo) DeleteOne(id uint32) error {
 }
 func (g *groupRepo) JoinGroupByLink(userEmail, groupCode string) (*entity.Group, error) {
 	group := &entity.Group{}
-
-	err := g.db.Where("invitation_link=?", groupCode).First(group).Error
+	groupCode = "http://localhost:3000/join-group/" + groupCode
+	fmt.Println(groupCode)
+	err := g.db.Debug().Where("invitation_link=?", "http://localhost:3000/join-group/7nNVIeR5sNWLMJaS11ltdM").First(group).Error
 	if group.ID == 0 || err != nil {
 		return nil, err
 	}
 
 	user := &entity.User{}
-	err = g.db.Where("email=?", userEmail).First(user).Error
+	err = g.db.Debug().Where("email=?", userEmail).First(user).Error
 	if user.ID == 0 || err != nil {
 		return nil, err
 	}
 
 	existedUser := &entity.GroupUser{}
-	if err := g.db.Where("user_id=?", user.ID).First(existedUser).Error; err != nil {
+	if err := g.db.Debug().Where("user_id=?", user.ID).First(existedUser).Error; err != nil {
 		return nil, err
 	}
 
@@ -92,8 +93,8 @@ func (g *groupRepo) JoinGroupByLink(userEmail, groupCode string) (*entity.Group,
 		Name:    user.Name,
 	}
 
-	if err := g.db.Model(groupUser).Create(groupUser).Error; err != nil {
-		return nil, err
+	if err := g.db.Debug().Model(groupUser).Create(groupUser).Error; err != nil {
+		return group, nil
 	}
 
 	return group, nil
